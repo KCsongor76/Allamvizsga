@@ -1,0 +1,63 @@
+.movieContainer {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    margin-top: 150px;
+}
+
+.movieDetails {
+    flex: 1;
+    padding-right: 20px;
+}
+
+.title {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.description {
+    font-size: 16px;
+    color: #555;
+}
+
+.info {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 5px;
+}
+
+.movieActors {
+    font-style: italic;
+}
+
+.moviePoster {
+    max-width: 200px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.buttonContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.button {
+    margin: 15px auto;
+    padding: 12px;
+    /*margin-top: 15px;*/
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
