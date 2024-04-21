@@ -17,14 +17,13 @@ const DetailedMoviePage = () => {
         <>
             <div className={classes.movieContainer}>
                 <div className={classes.movieDetails}>
-                    <h1 className={classes.title}>{movie.Title}</h1>
-                    <p className={classes.description}>Plot: {movie.Plot}</p>
-                    <p className={classes.info}>Director: {movie.Director}</p>
-                    <p className={`${classes.info} ${classes.movieActors}`}>Actors: {movie.Actors}</p>
-                    <p className={classes.info}>Released: {movie.Released}</p>
-                    <p className={classes.info}>Language: {movie.Language}</p>
+                    <h1 className={classes.title}>{movie.title}</h1>
+                    <p className={classes.description}>Plot: {movie.plot}</p>
+                    <p className={classes.info}>Director: {movie.director}</p>
+                    <p className={`${classes.info} ${classes.movieActors}`}>Actors: {movie.actors}</p>
+                    <p className={classes.info}>Released: {movie.year}</p>
                 </div>
-                <img src={movie.Poster} alt={movie.Title} className={classes.moviePoster}/>
+                <img src={movie.poster} alt={movie.Title} className={classes.moviePoster}/>
             </div>
             <div className={classes.buttonContainer}>
                 <button className={classes.button} onClick={navigateHandler}>Go Back</button>

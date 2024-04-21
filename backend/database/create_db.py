@@ -1,16 +1,11 @@
 import mysql.connector
-
-# Database credentials
-host = "localhost"
-username = "root"
-password = ""
-dbname = "movielens_db"
+from mysql_constants import HOST, USERNAME, PASSWORD, DBNAME, CREATE_DB_SQL, CREATE_TABLES_SQL
 
 # Create a new connection
 conn = mysql.connector.connect(
-    host=host,
-    user=username,
-    password=password
+    host=HOST,
+    user=USERNAME,
+    password=PASSWORD
 )
 
 # Check the connection
@@ -22,7 +17,7 @@ cursor = conn.cursor()
 
 # Create the database
 try:
-    cursor.execute(f"CREATE DATABASE {dbname}")
+    cursor.execute(CREATE_DB_SQL)
     print("Database created successfully")
 except mysql.connector.Error as err:
     print(f"Error creating database: {err}")
@@ -33,10 +28,10 @@ conn.close()
 
 # Create a new connection to the created database
 conn = mysql.connector.connect(
-    host=host,
-    user=username,
-    password=password,
-    database=dbname
+    host=HOST,
+    user=USERNAME,
+    password=PASSWORD,
+    database=DBNAME
 )
 
 # Check the connection
@@ -46,46 +41,9 @@ if conn.is_connected():
 # Create a cursor object
 cursor = conn.cursor()
 
-# SQL queries to create the tables
-sql = """
-    CREATE TABLE users (
-        userId INT(11) PRIMARY KEY, 
-        username VARCHAR(255),
-        password VARCHAR(255)
-    );
-    CREATE TABLE movies (
-        movieId INT(11) PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
-        genre VARCHAR(255) NOT NULL,
-        year VARCHAR(255) NOT NULL,
-        director VARCHAR(255) NOT NULL,
-        actors VARCHAR(255) NOT NULL,
-        plot VARCHAR(255) NOT NULL,
-        poster VARCHAR(255) NOT NULL,
-        imdb_votes VARCHAR(255) NOT NULL,
-        imdb_rating VARCHAR(255) NOT NULL
-    );
-    CREATE TABLE links (
-        movieId INT(11),
-        imdbId VARCHAR(11),
-        tmdbId VARCHAR(11),
-        PRIMARY KEY (movieId),
-        FOREIGN KEY (movieId) REFERENCES movies(movieId)
-    );
-    CREATE TABLE ratings (
-        userId INT(11),
-        movieId INT(11),
-        rating DECIMAL(2,1) NOT NULL,
-        timestamp TIMESTAMP NOT NULL,
-        PRIMARY KEY (userId, movieId),
-        FOREIGN KEY (userId) REFERENCES users(userId),
-        FOREIGN KEY (movieId) REFERENCES movies(movieId)
-    );
-"""
-
 # Execute the SQL queries
 try:
-    cursor.execute(sql, multi=True)
+    cursor.execute(CREATE_TABLES_SQL, multi=True)
     print("Tables created successfully")
 except mysql.connector.Error as err:
     print(f"Error creating tables: {err}")

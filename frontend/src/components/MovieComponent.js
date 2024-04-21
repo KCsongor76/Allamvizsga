@@ -14,8 +14,8 @@ const MovieComponent = ({item, index}) => {
             className={classes.item}
             onClick={() => navigateHandler(index)}
         >
-            <p>{JSON.parse(item).Title}</p>
-            <img src={JSON.parse(item).Poster} alt={JSON.parse(item).Title}/>
+            <p>{JSON.parse(item).title}</p>
+            <img src={JSON.parse(item).poster} alt={JSON.parse(item).title}/>
         </div>
     );
 }

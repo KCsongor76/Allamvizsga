@@ -25,7 +25,7 @@ const LoginPage = ({onAuth}) => {
 
     return (
         <form
-            action="/alma"
+            action="/login"
             method="POST"
             onSubmit={event => submitHandler(event)}
             className={classes.container}

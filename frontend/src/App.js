@@ -22,7 +22,7 @@ function App() {
         console.log(result);
         if (!result.message) {
             setIsAuth(true);
-            result[1] = result[1].map(movie => JSON.stringify(movie));
+            result = result.map(movie => JSON.stringify(movie));
 
             setRecommendedMovies(result)
         }

@@ -2,15 +2,17 @@ import csv
 import mysql.connector
 from faker import Faker
 from datetime import datetime
+from mysql_constants import HOST, DBNAME, USERNAME, PASSWORD, INSERT_INTO_USERS_SQL, INSERT_INTO_MOVIES_SQL, \
+    INSERT_INTO_LINKS_SQL, INSERT_INTO_RATINGS_SQL
 
 
 def connect_to_db():
     # Database credentials
     connection = mysql.connector.connect(
-        host='localhost',
-        user='root',
-        password='',
-        database='movielens_db'
+        host=HOST,
+        user=USERNAME,
+        password=PASSWORD,
+        database=DBNAME
     )
     return connection
 
@@ -25,10 +27,8 @@ def insert_users():
     for i in range(1, num_records + 1):
         username = faker.user_name()
         password = faker.password()
-
         # Insert fake data into the users table
-        sql = "INSERT INTO users (userId, username, password) VALUES (%s, %s, %s)"
-        cursor.execute(sql, (i, username, password))
+        cursor.execute(INSERT_INTO_USERS_SQL, (i, username, password))
 
     connection.commit()
     connection.close()
@@ -64,11 +64,9 @@ if __name__ == "__main__":
     links_path = "links.csv"
     ratings_path = "ratings.csv"
 
-    movies_query = ("INSERT INTO movies"
-                    " (movieId, title, genre, year, director, actors, plot, poster, imdb_votes, imdb_rating)"
-                    " VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
-    links_query = "INSERT INTO links (movieId, imdbId, tmdbId) VALUES (%s, %s, %s)"
-    ratings_query = "INSERT INTO ratings (userId, movieId, rating, timestamp) VALUES (%s, %s, %s, %s)"
+    movies_query = INSERT_INTO_MOVIES_SQL
+    links_query = INSERT_INTO_LINKS_SQL
+    ratings_query = INSERT_INTO_RATINGS_SQL
 
     insert_users()
     process_csv(movies_path, movies_query, "movies")
