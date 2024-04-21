@@ -1,0 +1,45 @@
+/* External Styling for Navigation Container */
+.container {
+    background-color: #cccccc;
+    padding: 10px;
+    border-bottom: 2px solid greenyellow;
+    display: flex;
+    justify-content: center;
+}
+
+/* External Styling for Navigation List */
+.navList {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+/* External Styling for Navigation Links */
+.navLink {
+    text-decoration: none;
+    color: black;
+    margin: 0 15px;
+    font-size: 16px;
+    position: relative;
+    transition: color 0.3s ease-in-out;
+}
+
+.navLink::before {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: #007bff;
+    transition: width 0.3s ease-in-out;
+}
+
+.navLink:hover {
+    color: #007bff;
+}
+
+.navLink:hover::before {
+    width: 100%;
+}
