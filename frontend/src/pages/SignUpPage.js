@@ -1,9 +1,10 @@
 import { useState } from "react";
 import classes from "./LoginPage.module.css";
 
-const LoginPage = ({ onAuth, onSignUp }) => {
+const SignUpPage = ({ onAuth, onSignUp }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConf, setPasswordConf] = useState("");
   const [receivedData, setReceivedData] = useState();
 
   const submitHandler = (event) => {
@@ -22,15 +23,14 @@ const LoginPage = ({ onAuth, onSignUp }) => {
       .catch((error) => console.error("Error:", error));
   };
 
-  const signUpHandler = (event) => {
-    //console.log(event.target);
-    onSignUp(false);
+  const loginHandler = () => {
+    onSignUp(true);
   };
 
   return (
     <>
       <form
-        action="/login"
+        action="/signup"
         method="POST"
         onSubmit={(event) => submitHandler(event)}
         className={classes.container}
@@ -58,18 +58,29 @@ const LoginPage = ({ onAuth, onSignUp }) => {
             className={classes.input}
           />
         </label>
+        <label className={classes.label}>
+          Confirm Password
+          <input
+            type="password"
+            id="password_confirmation"
+            name="password_confirmation"
+            value={passwordConf}
+            onChange={(event) => setPasswordConf(event.target.value)}
+            className={classes.input}
+          />
+        </label>
         <button type="submit" className={classes.button}>
-          Login
+          Sign Up
         </button>
         {receivedData && (
           <p className={classes.errorMessage}>{receivedData.message}</p>
         )}
       </form>
-      <button className={classes.button} onClick={signUpHandler}>
-        Sign up here
+      <button className={classes.button} onClick={loginHandler}>
+        Log in here
       </button>
     </>
   );
 };
 
-export default LoginPage;
+export default SignUpPage;

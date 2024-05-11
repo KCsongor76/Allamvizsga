@@ -3,6 +3,18 @@ from flask import Flask, jsonify, request
 app = Flask(__name__)
 
 
+@app.route("/signup", methods=["POST"])
+def signup():
+    print(request.form)
+    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'password_confirmation' in request.form:
+        password = request.form['password']
+        password_conf = request.form['password_confirmation']
+        if password != password_conf:
+            return jsonify({"message": "The passwords aren't the same."})
+        return jsonify({"message": "Same passwords."})
+    return jsonify({'message': 'A server error has occured.'})
+
+
 @app.route("/login", methods=['POST'])
 def login():
     from database.mysql_constants import HOST, DBNAME, USERNAME, PASSWORD, LOGIN_SQL
@@ -17,7 +29,6 @@ def login():
         user_id = cursor.fetchone()
         if user_id is not None:
             user_id = user_id[0]
-            print(user_id)
             recommended_movies = generate_recommendation(connection, user_id)
             return jsonify(recommended_movies)
         return jsonify({'message': 'Incorrect username or password'})
