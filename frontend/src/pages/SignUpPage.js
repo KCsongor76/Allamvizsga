@@ -1,11 +1,14 @@
 import { useState } from "react";
-import classes from "./LoginPage.module.css";
+import SignUpForm from "../components/SignUpForm";
+import ProfileForm from "../components/ProfileForm";
 
-const SignUpPage = ({ onAuth, onSignUp }) => {
+const SignUpPage = ({ onSignUp }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConf, setPasswordConf] = useState("");
   const [receivedData, setReceivedData] = useState();
+
+  const [isSignUp, setIsSignUp] = useState(false);
 
   const submitHandler = (event) => {
     event.preventDefault();
@@ -17,69 +20,37 @@ const SignUpPage = ({ onAuth, onSignUp }) => {
     })
       .then((response) => response.json())
       .then((data) => {
-        onAuth(data);
+        onSignUp[1](data);
         setReceivedData(data);
+        if (data.actors && data.genres) {
+          setIsSignUp(true);
+        }
       })
       .catch((error) => console.error("Error:", error));
   };
 
   const loginHandler = () => {
-    onSignUp(true);
+    onSignUp[0](true);
   };
 
-  return (
-    <>
-      <form
-        action="/signup"
-        method="POST"
-        onSubmit={(event) => submitHandler(event)}
-        className={classes.container}
-      >
-        <label className={classes.label}>
-          Username
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-            className={classes.input}
-          />
-        </label>
-
-        <label className={classes.label}>
-          Password
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className={classes.input}
-          />
-        </label>
-        <label className={classes.label}>
-          Confirm Password
-          <input
-            type="password"
-            id="password_confirmation"
-            name="password_confirmation"
-            value={passwordConf}
-            onChange={(event) => setPasswordConf(event.target.value)}
-            className={classes.input}
-          />
-        </label>
-        <button type="submit" className={classes.button}>
-          Sign Up
-        </button>
-        {receivedData && (
-          <p className={classes.errorMessage}>{receivedData.message}</p>
-        )}
-      </form>
-      <button className={classes.button} onClick={loginHandler}>
-        Log in here
-      </button>
-    </>
+  return !isSignUp ? (
+    <SignUpForm
+      username={username}
+      password={password}
+      passwordConf={passwordConf}
+      receivedData={receivedData}
+      setUsername={setUsername}
+      setPassword={setPassword}
+      setPasswordConf={setPasswordConf}
+      submitHandler={submitHandler}
+      loginHandler={loginHandler}
+    />
+  ) : (
+    <ProfileForm
+      genres={receivedData.genres}
+      actors={receivedData.actors}
+      onCreateProfile={onSignUp[1]}
+    />
   );
 };
 

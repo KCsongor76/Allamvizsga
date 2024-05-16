@@ -14,12 +14,18 @@ const LoginPage = ({ onAuth, onSignUp }) => {
       method: "POST",
       body: new URLSearchParams(new FormData(form)),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        console.log(response.status);
+        return response.json();
+      })
       .then((data) => {
+        console.log(data);
         onAuth(data);
         setReceivedData(data);
       })
-      .catch((error) => console.error("Error:", error));
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   };
 
   const signUpHandler = (event) => {

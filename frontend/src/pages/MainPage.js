@@ -1,4 +1,3 @@
-import {useState} from "react";
 import Row from "../components/Row";
 
 const MainPage = ({recommendedMovies}) => {

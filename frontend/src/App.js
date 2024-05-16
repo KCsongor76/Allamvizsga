@@ -11,13 +11,24 @@ import AuthPage from "./pages/AuthPage";
 function App() {
   const [isAuth, setIsAuth] = useState(false);
   const [recommendedMovies, setRecommendedMovies] = useState([]);
-  const authHandler = (result) => {
-    console.log(result);
-    if (!result.message) {
-      setIsAuth(true);
-      result = result.map((movie) => JSON.stringify(movie));
 
-      setRecommendedMovies(result);
+  const authHandler = (data) => {
+    console.log(data);
+    if (data.movies.length > 0) {
+      setIsAuth(true);
+      const movies = data.movies.map((movie) => JSON.stringify(movie));
+      setRecommendedMovies(movies);
+    }
+  };
+
+  const signUpHandler = (data) => {
+    if (data.movies) {
+      console.log(data);
+      console.log(data.movies);
+      setIsAuth(true);
+      const movies = data.movies.map((movie) => JSON.stringify(movie));
+      console.log(movies);
+      setRecommendedMovies(movies);
     }
   };
 
@@ -39,7 +50,7 @@ function App() {
   return isAuth ? (
     <RouterProvider router={router} />
   ) : (
-    <AuthPage onAuth={authHandler} isLogin={true} />
+    <AuthPage onAuth={authHandler} onSignUp={signUpHandler} isLogin={true} />
   );
 }
 
