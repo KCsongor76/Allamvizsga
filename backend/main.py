@@ -12,9 +12,6 @@ app = Flask(__name__)
 
 
 # TODO: sql injection, xss, ...,  prevention
-# TODO: imports - lazy loading?
-# TODO: MVC?
-# TODO: comments, docstrings
 
 @app.route("/signup", methods=["POST"])
 def signup():
@@ -24,43 +21,17 @@ def signup():
         password_confirmation = request.form['password_confirmation']
 
         if username == "":
-            return jsonify(
-                {
-                    "message": "Fill in the username!",
-                    "type": "signup",
-                }
-            ), 401
+            return jsonify({"message": "Fill in the username!"}), 401
         try:
-            user_id = Database.db_process(query=SELECT_USER_ID_BY_USERNAME_SQL, params=(username,), )
-
+            user_id = Database.db_process(query=SELECT_USER_ID_BY_USERNAME_SQL, params=(username,))
             if user_id is not None:
-                return jsonify(
-                    {
-                        "message": "This username already exists!",
-                        "type": "signup"
-                    }
-                ), 401
+                return jsonify({"message": "This username already exists!"}), 401
             if password == "":
-                return jsonify(
-                    {
-                        "message": "Fill in the password!",
-                        "type": "signup"
-                    }
-                ), 401
+                return jsonify({"message": "Fill in the password!"}), 401
             if password_confirmation == "":
-                return jsonify(
-                    {
-                        "message": "Fill in the password confirmation!",
-                        "type": "signup"
-                    }
-                ), 401
+                return jsonify({"message": "Fill in the password confirmation!"}), 401
             if password != password_confirmation:
-                return jsonify(
-                    {
-                        "message": "The passwords aren't the same.",
-                        "type": "signup"
-                    }
-                ), 401
+                return jsonify({"message": "The passwords aren't the same."}), 401
 
             row = Database.db_process(query=SELECT_MAX_USER_ID_SQL)
             if row is not None:
@@ -87,225 +58,235 @@ def signup():
 
         except Exception as e:
             print("Error during signup:", e)
-            return jsonify(
-                {
-                    'message': 'A server error has occurred.',
-                    "type": "signup"
-                }
-            ), 500  # Internal Server Error
-        finally:
-            Database.close_connection()
+            return jsonify({'message': 'A server error has occurred.'}), 500  # Internal Server Error
     else:
-        return jsonify(
-            {
-                'message': 'Bad request.',
-                "type": "signup"
-            }
-        ), 400  # Bad Request
+        return jsonify({'message': 'Bad request.'}), 400  # Bad Request
 
 
 @app.route("/login", methods=['POST'])
 def login():
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
+    try:
+        # Validate request method and form data
+        if request.method != 'POST' or 'username' not in request.form or 'password' not in request.form:
+            return jsonify({"error": "Invalid request method or missing 'username' or 'password' in form data."}), 400
+
         username = request.form['username']
         password = request.form['password']
-        try:
-            user_id = Database.db_process(query=LOGIN_SQL, params=(username, password), )
 
-            if user_id is not None:
-                user_id = user_id[0]
-                recommended_movies = TestRecSys.generate_recommendation(user_id)
-                return jsonify(
-                    {
-                        'message': 'Successful login!',
-                        'movies': recommended_movies,
-                        'user_id': user_id,
-                        "type": "login"
-                    }
-                ), 200  # Successful login
-            else:
-                return jsonify(
-                    {
-                        'message': 'Incorrect username or password',
-                        "type": "login"
-                    }
-                ), 401  # Unauthorized
-        except Exception as e:
-            print("Error during login:", e)
-            return jsonify(
-                {
-                    'message': 'A server error has occurred',
-                    "type": "login"
-                }
-            ), 500  # Internal Server Error
-        finally:
-            Database.close_connection()
-    else:
-        return jsonify(
-            {
-                'message': 'Bad request',
-                "type": "login"
-            }
-        ), 400  # Bad Request
+        # Attempt to retrieve user ID from the database
+        user_id = Database.db_process(query=LOGIN_SQL, params=(username, password), fetchone=True)
+
+        # If user ID exists, generate movie recommendations for the user
+        if user_id:
+            user_id = user_id[0]
+            recommended_movies = TestRecSys.generate_recommendation(user_id)
+            return jsonify({
+                'message': 'Successful login!',
+                'movies': recommended_movies,
+                'user_id': user_id,
+            }), 200  # Successful login
+        else:
+            return jsonify({'message': 'Incorrect username or password'}), 401  # Unauthorized
+
+    except Exception as e:
+        print("Error during login:", e)
+        return jsonify({'message': 'A server error has occurred'}), 500  # Internal Server Error
 
 
 @app.route('/create_profile', methods=['POST'])
 def create_profile():
-    selected_data = json.loads(request.form['selectedData'])
-    print(f"selected data: {selected_data}")
-    selected_genres = selected_data['selectedGenres']
-    selected_actors = selected_data['selectedActors']
-    user_id = selected_data['userId']
-    # TODO: coding convention... (user_id vs userId from React) ?
+    try:
+        # Validate request form data
+        if "selectedData" not in request.form:
+            return jsonify({"error": "Missing 'selectedData' in form data."}), 400
 
-    if len(selected_actors) == 0 or len(selected_genres) == 0:
-        return jsonify(
-            {
-                'type': 'create_profile',
-                'message': 'No genres or actors selected'
-            }
-        ), 400
+        selected_data = json.loads(request.form['selectedData'])
+        selected_genres = selected_data['selectedGenres']
+        selected_actors = selected_data['selectedActors']
+        user_id = selected_data['userId']  # TODO: coding convention... (user_id vs userId from React) ?
 
-    recommended_movies = TestRecSys.generate_recommendation(actors=selected_actors, genres=selected_genres)
-    actors = ' '.join([actor.replace(' ', '') for actor in selected_actors])
-    genres = ' '.join([genre.replace(' ', '') for genre in selected_genres])
-    # TODO: not good enough
+        # Check if genres or actors are selected
+        if not selected_actors or not selected_genres:
+            return jsonify({"message": "No genres or actors selected"}), 400
 
-    Database.db_process(query=UPDATE_PROFILE_SQL,
-                        params=(actors, genres, user_id),
-                        fetchone=False,
-                        commit_needed=True)
+        # Generate movie recommendations based on selected genres and actors
+        recommended_movies = TestRecSys.generate_recommendation(actors=selected_actors, genres=selected_genres)
 
-    return jsonify(
-        {
-            'type': 'create_profile',
+        # Format selected genres and actors
+        actors = ' '.join([actor.replace(' ', '') for actor in selected_actors])
+        genres = ' '.join([genre.replace(' ', '') for genre in selected_genres])
+
+        # Update user profile in the database
+        Database.db_process(query=UPDATE_PROFILE_SQL,
+                            params=(actors, genres, user_id),
+                            fetchone=False,
+                            commit_needed=True)
+
+        return jsonify({
             'message': 'Profile created successfully',
             'movies': recommended_movies,
             "genres": selected_genres,
             "actors": selected_actors,
             "user_id": user_id
-        }
-    ), 200
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/update_rating", methods=["PUT"])
 def update_rating():
-    movie_id = request.form["movieId"]
-    user_id = request.form["userId"]
-    rating = float(request.form["rating"])
-    current_time = datetime.datetime.now()
-    timestamp = current_time.strftime('%Y-%m-%d %H:%M:%S')
+    try:
+        # Validate request form data
+        if "userId" not in request.form or "movieId" not in request.form or "rating" not in request.form:
+            return jsonify({"error": "Missing 'userId', 'movieId', or 'rating' in form data."}), 400
 
-    Database.db_process(query=UPDATE_RATINGS_SQL,
-                        params=(rating, timestamp, user_id, movie_id),
-                        fetchone=False,
-                        commit_needed=True)
-    return jsonify({"message": "Rating updated successfully"}), 200
+        movie_id = request.form["movieId"]
+        user_id = request.form["userId"]
+        rating = float(request.form["rating"])
+        current_time = datetime.datetime.now()
+        timestamp = current_time.strftime('%Y-%m-%d %H:%M:%S')
+
+        # Update rating in the database
+        Database.db_process(query=UPDATE_RATINGS_SQL,
+                            params=(rating, timestamp, user_id, movie_id),
+                            fetchone=False,
+                            commit_needed=True)
+
+        return jsonify({"message": "Rating updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/delete_rating", methods=["DELETE"])
 def delete_rating():
-    movie_id = request.form["movieId"]
-    user_id = request.form["userId"]
+    try:
+        # Validate request form data
+        if "userId" not in request.form or "movieId" not in request.form:
+            return jsonify({"error": "Missing 'userId' or 'movieId' in form data."}), 400
 
-    Database.db_process(query=DELETE_RATING_SQL,
-                        params=(user_id, movie_id),
-                        fetchone=False,
-                        commit_needed=True)
-    return jsonify({"message": "Rating deleted successfully"}), 200
+        movie_id = request.form["movieId"]
+        user_id = request.form["userId"]
+
+        # Delete rating from the database
+        Database.db_process(query=DELETE_RATING_SQL,
+                            params=(user_id, movie_id),
+                            fetchone=False,
+                            commit_needed=True)
+        return jsonify({"message": "Rating deleted successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/add_rating", methods=["POST"])
 def add_rating():
-    movie_id = request.form["movieId"]
-    user_id = request.form["userId"]
-    rating = float(request.form["rating"])
-    current_time = datetime.datetime.now()
-    timestamp = current_time.strftime('%Y-%m-%d %H:%M:%S')
+    try:
+        # Validate request form data
+        if "userId" not in request.form or "movieId" not in request.form or "rating" not in request.form:
+            return jsonify({"error": "Missing 'userId', 'movieId', or 'rating' in form data."}), 400
 
-    Database.db_process(query=INSERT_INTO_RATINGS_SQL,
-                        params=(user_id, movie_id, rating, timestamp),
-                        fetchone=False,
-                        commit_needed=True)
-    return jsonify({"message": "Rating added successfully"}), 200
+        movie_id = request.form["movieId"]
+        user_id = request.form["userId"]
+        rating = float(request.form["rating"])
+        current_time = datetime.datetime.now()
+        timestamp = current_time.strftime('%Y-%m-%d %H:%M:%S')
+
+        # Add rating to the database
+        Database.db_process(query=INSERT_INTO_RATINGS_SQL,
+                            params=(user_id, movie_id, rating, timestamp),
+                            fetchone=False,
+                            commit_needed=True)
+
+        return jsonify({"message": "Rating added successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/get_rating_by_ids", methods=["POST"])
 def get_rating_by_ids():
-    movie_id = request.json["movieId"]
-    user_id = request.json["userId"]
-    rating = Database.db_process(query=SELECT_RATING_MOVIE_USER_ID_SQL, params=(movie_id, user_id))
+    try:
+        # Validate request JSON
+        if "userId" not in request.json or "movieId" not in request.json:
+            return jsonify({"error": "Missing 'userId' or 'movieId' in request."}), 400
 
-    if rating is not None:
-        rating = float(rating[0])
-    if type(rating) is float or type(rating) is int:
-        return jsonify(
-            {
-                "type": "get_rating_by_ids",
-                "rating": rating
-            }
-        ), 200
-    return jsonify(
-        {
-            "type": "get_rating_by_ids",
-            "message": "no rating yet"
-        }
-    ), 200
+        user_id = request.json["userId"]
+        movie_id = request.json["movieId"]
+        # Fetch rating from the database
+        rating = Database.db_process(query=SELECT_RATING_MOVIE_USER_ID_SQL, params=(movie_id, user_id))
+
+        # If rating exists, convert it to float
+        if rating is not None:
+            rating = float(rating[0])
+
+        # Return the rating if it's a float or an integer
+        if isinstance(rating, (float, int)):
+            return jsonify({"type": "get_rating_by_ids", "rating": rating}), 200
+
+        # If no rating found, return a message
+        return jsonify({"type": "get_rating_by_ids", "message": "No rating yet"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/get_username_by_id", methods=["POST"])
 def get_username_by_id():
-    user_id = request.json["userId"]
-    username = Database.db_process(query=SELECT_USERNAME_BY_USER_ID_SQL, params=(user_id,))
+    try:
+        # Validate request JSON
+        if "userId" not in request.json:
+            return jsonify({"error": "Missing 'userId' in request."}), 400
+        user_id = request.json["userId"]
 
-    print(user_id, username[0])
-    return jsonify(
-        {
-            "message": "Username fetched successfully!",
-            "username": username[0]
-        }
-    ), 200
+        # Fetch username from the database
+        username = Database.db_process(query=SELECT_USERNAME_BY_USER_ID_SQL, params=(user_id,))
+        if username:
+            return jsonify({"message": "Username fetched successfully!", "username": username}), 200
+        else:
+            return jsonify({"error": "User not found."}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/get_user_stats", methods=["POST"])
 def get_user_stats():
-    user_id = request.json["userId"]
-    profile_data = Database.db_process(query=SELECT_PROFILE_DATA_BY_USER_ID_SQL, params=(user_id,))
+    try:
+        # Validate request JSON
+        if "userId" not in request.json:
+            return jsonify({"error": "Missing 'userId' in request."}), 400
 
-    actors = profile_data[0]
-    genres = profile_data[1]
-    data = Database.db_process(query=SELECT_STATS_BY_USER_ID, params=(user_id,))
+        user_id = request.json["userId"]
 
-    count = data[0]
-    if count == 0:
-        return jsonify(
-            {
-                "message": "No rated movies.",
-                "actors": actors,
-                "genres": genres,
-            }
-        ), 200
-    avg = float(data[1])
-    movies = Database.db_process(query=SELECT_RATED_MOVIES_BY_USER_ID_SQL, params=(user_id,), fetchone=False)
-    movies_list = []
-    for movie in movies:
-        movie_dict = AbstractRecSys.movie_to_dict(movie)
-        print(movie_dict)
-        movies_list.append(movie_dict)
+        # Fetch profile data from the database
+        profile_data = Database.db_process(query=SELECT_PROFILE_DATA_BY_USER_ID_SQL, params=(user_id,))
+        actors, genres = profile_data[0], profile_data[1]
 
-    Database.close_connection()
-    return jsonify(
-        {
-            "message": "alma",
+        # Fetch stats data from the database
+        stats_data = Database.db_process(query=SELECT_STATS_BY_USER_ID, params=(user_id,))
+        count = stats_data[0]
+        # If no rated movies, return with profile data only
+        if count == 0:
+            return jsonify({"message": "No rated movies.", "actors": actors, "genres": genres}), 200
+        avg = float(stats_data[1])
+
+        # Fetch rated movies
+        movies = Database.db_process(query=SELECT_RATED_MOVIES_BY_USER_ID_SQL, params=(user_id,), fetchone=False)
+        # Convert movie data to dictionary format
+        movies_list = [AbstractRecSys.movie_to_dict(movie) for movie in movies]
+
+        return jsonify({
+            "message": "User stats fetched successfully.",
             "actors": actors,
             "genres": genres,
             "movies": movies_list,
-            "stats": {
-                "count": count,
-                "avg": avg
-            }
-        }
-    ), 200
+            "stats": {"count": count, "avg": avg}
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':
