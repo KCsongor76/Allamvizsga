@@ -4,10 +4,9 @@ import SignUpPage from "./SignUpPage";
 
 const AuthPage = ({ onAuth, onSignUp, isLogin }) => {
   const [isLoginState, setIsLoginState] = useState(isLogin);
-  console.log(isLoginState);
   
   return isLoginState ? (
-    <LoginPage onAuth={onAuth} onSignUp={setIsLoginState} />
+    <LoginPage onAuth={onAuth} onLogin={setIsLoginState} />
   ) : (
     <SignUpPage onSignUp={[setIsLoginState, onSignUp]} />
   );

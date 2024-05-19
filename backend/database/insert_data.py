@@ -60,9 +60,9 @@ def process_csv(csv_file, query, type):
 
 
 if __name__ == "__main__":
-    movies_path = "movies_metadata.csv"
-    links_path = "links.csv"
-    ratings_path = "ratings.csv"
+    movies_path = "csvdata/movies_metadata.csv"
+    links_path = "csvdata/links.csv"
+    ratings_path = "csvdata/ratings.csv"
 
     movies_query = INSERT_INTO_MOVIES_SQL
     links_query = INSERT_INTO_LINKS_SQL

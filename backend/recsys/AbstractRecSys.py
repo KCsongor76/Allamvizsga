@@ -1,72 +1,24 @@
 from abc import ABC, abstractmethod
-import mysql.connector
+from typing import Union
+
 import pandas as pd
-from backend.database.mysql_constants import HOST, DBNAME, USERNAME, PASSWORD, SELECT_MOVIE_BY_ID_SQL
 
-
-# TODO: separate database operations
+from backend.database.Database.Database import Database
+from backend.database.mysql_constants import SELECT_MOVIE_BY_ID_SQL
 
 
 class AbstractRecSys(ABC):
-    _connection = None
-
     @classmethod
-    def connect_to_mysql(cls):
-        try:
-            cls._connection = mysql.connector.connect(
-                host=HOST,
-                database=DBNAME,
-                user=USERNAME,
-                password=PASSWORD
-            )
-        except Exception as e:
-            print("Error connecting to MySQL:", e)
-            cls._connection = None
-
-    @classmethod
-    def get_connection(cls):
-        if cls._connection is None or not cls._connection.is_connected():
-            cls.connect_to_mysql()
-        return cls._connection
-
-    @classmethod
-    def close_connection(cls):
-        try:
-            if cls._connection is not None and cls._connection.is_connected():
-                # Consume any unread results
-                while cls._connection.next_result():
-                    pass
-                cls._connection.close()
-        except Exception as e:
-            print("Error closing connection:", e)
-        finally:
-            # Reset the connection attribute to None
-            cls._connection = None
-
-    @classmethod
-    def read_mysql_to_dataframe(cls, query):
-        try:
-            cursor = cls.get_connection().cursor()
-            cursor.execute(query)
-            columns = [col[0] for col in cursor.description]
-            data = cursor.fetchall()
-            cursor.close()
-            return pd.DataFrame(data, columns=columns)
-        except Exception as e:
-            print("Error executing MySQL query:", e)
-            return None
-
-    @classmethod
-    def get_movie_by_id(cls, id):
+    def get_movie_by_id(cls, movie_id: int) -> Union[None, tuple]:
         query = SELECT_MOVIE_BY_ID_SQL
-        cursor = cls.get_connection().cursor()
-        cursor.execute(query, (id,))
+        cursor = Database.get_connection().cursor()
+        cursor.execute(query, (movie_id,))
         movie = cursor.fetchone()
         cursor.close()
         return movie
 
     @staticmethod
-    def movie_to_dict(movie):
+    def movie_to_dict(movie: Union[None, tuple]) -> dict:
         if movie:
             return {
                 "id": movie[0],
@@ -83,10 +35,10 @@ class AbstractRecSys(ABC):
         return {}
 
     @classmethod
-    def get_movies_by_id_list(cls, ids: list[int]):
+    def get_movies_by_id_list(cls, movie_id_list: list[int]) -> list[dict]:
         movies = []
-        for id in ids:
-            movie = cls.get_movie_by_id(id)
+        for movie_id in movie_id_list:
+            movie = cls.get_movie_by_id(movie_id)
             movie_dict = cls.movie_to_dict(movie)
             if movie_dict:
                 movies.append(movie_dict)
@@ -94,17 +46,18 @@ class AbstractRecSys(ABC):
 
     @classmethod
     @abstractmethod
-    def generate_recommendation(cls, user_id, actors=None, genres=None, top_n=15):
+    def generate_recommendation(cls, user_id: [None, int] = None, actors: list = None, genres: list = None,
+                                top_n: int = 15) -> list:
         pass
 
     @staticmethod
-    def extract_genres(genres_df):
+    def extract_genres(genres_df: pd.DataFrame) -> list[str]:
         return list(set(genre for genres in genres_df.values.tolist() for genre in genres[0].split('|') if
                         genre != "(no genres listed)"))
 
     @classmethod
-    def get_unique_genres(cls):
-        genres_df = cls.read_mysql_to_dataframe("SELECT genre FROM movies")
+    def get_unique_genres(cls) -> list[str]:
+        genres_df = Database.read_mysql_to_dataframe("SELECT genre FROM movies")
         if genres_df is not None:
             return cls.extract_genres(genres_df)
         return []
@@ -112,12 +65,12 @@ class AbstractRecSys(ABC):
         # 'Adventure', 'Western', 'Film-Noir', 'Action', 'Documentary', 'Fantasy', 'Romance', 'Musical', 'Crime']
 
     @staticmethod
-    def extract_actors(actors_df):
+    def extract_actors(actors_df: pd.DataFrame) -> list[str]:
         return list(set(actor.strip() for actors in actors_df.values.tolist() for actor in actors[0].split(',')))
 
     @classmethod
-    def get_unique_actors(cls):
-        actors_df = cls.read_mysql_to_dataframe("SELECT actors FROM movies")
+    def get_unique_actors(cls) -> list[str]:
+        actors_df = Database.read_mysql_to_dataframe("SELECT actors FROM movies")
         if actors_df is not None:
             return cls.extract_actors(actors_df)
         return []

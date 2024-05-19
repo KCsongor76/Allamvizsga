@@ -10,7 +10,9 @@ CREATE_TABLES_SQL = """
     CREATE TABLE users (
         userId INT(11) PRIMARY KEY, 
         username VARCHAR(255),
-        password VARCHAR(255)
+        password VARCHAR(255),
+        actors_profile VARCHAR(255),
+        genres_profile VARCHAR(255)
     );
     CREATE TABLE movies (
         movieId INT(11) PRIMARY KEY,
@@ -48,4 +50,15 @@ INSERT_INTO_RATINGS_SQL = "INSERT INTO ratings (userId, movieId, rating, timesta
 
 SELECT_MOVIE_BY_ID_SQL = "SELECT movieId, title, genre, year, director, actors, plot, poster, imdb_votes, imdb_rating FROM movies WHERE movieId = %s"
 SELECT_RATINGS_SQL = "SELECT userId, movieId, rating, timestamp FROM ratings"
+SELECT_RATING_MOVIE_USER_ID_SQL = "SELECT rating FROM ratings WHERE movieId = %s AND userId = %s"
+SELECT_STATS_BY_USER_ID = "SELECT COUNT(*), AVG(rating) FROM ratings WHERE userId = %s"
+SELECT_RATED_MOVIES_BY_USER_ID_SQL = "SELECT * FROM movies INNER JOIN ratings ON movies.movieId = ratings.movieId WHERE ratings.userId = %s"
+SELECT_MAX_USER_ID_SQL = "SELECT MAX(userId) FROM users"
+SELECT_USER_ID_BY_USERNAME_SQL = "SELECT userId FROM users WHERE username = %s LIMIT 1"
+SELECT_USERNAME_BY_USER_ID_SQL = "SELECT username FROM users WHERE userId = %s"
+SELECT_PROFILE_DATA_BY_USER_ID_SQL = "SELECT actors_profile, genres_profile FROM users WHERE userId = %s"
 LOGIN_SQL = "SELECT userId FROM users WHERE username = %s AND password = %s"
+
+UPDATE_PROFILE_SQL = "UPDATE users SET actors_profile = %s, genres_profile = %s WHERE userId = %s"
+UPDATE_RATINGS_SQL = "UPDATE ratings SET rating = %s, timestamp = %s WHERE userId = %s AND movieId = %s"
+DELETE_RATING_SQL = "DELETE FROM ratings WHERE userId = %s AND movieId = %s"

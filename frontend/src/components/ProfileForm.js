@@ -1,55 +1,30 @@
 import { useState } from "react";
+import {
+  profileSubmitHandler,
+  removeActor,
+  removeGenre,
+} from "../functions/profileFormFunctions";
 
-const ProfileForm = ({ genres, actors, onCreateProfile }) => {
+const ProfileForm = ({ genres, actors, userId, onCreateProfile }) => {
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [selectedActors, setSelectedActors] = useState([]);
   const [searchGenres, setSearchGenres] = useState("");
   const [searchActors, setSearchActors] = useState("");
 
-  const submitHandler = (event) => {
-    event.preventDefault();
-    const form = event.target;
-
-    // Prepare data to send
-    const formData = new FormData(form);
-    const selectedData = {
-      selectedGenres,
-      selectedActors,
-    };
-
-    // Append selectedGenres and selectedActors to formData
-    formData.append("selectedData", JSON.stringify(selectedData));
-
-    fetch(form.action, {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        onCreateProfile(data)
-      })
-      .catch((error) => console.error("Error:", error));
-  };
-
-  const removeGenre = (index) => {
-    setSelectedGenres((prevGenres) => {
-      const newGenres = [...prevGenres];
-      newGenres.splice(index, 1); // Remove the genre at the given index
-      return newGenres;
-    });
-  };
-
-  const removeActor = (index) => {
-    setSelectedActors((prevActors) => {
-      const newActors = [...prevActors];
-      newActors.splice(index, 1); // Remove the genre at the given index
-      return newActors;
-    });
-  };
-
   return (
-    <form action="/create_profile" method="POST" onSubmit={submitHandler}>
+    <form
+      action="/create_profile"
+      method="POST"
+      onSubmit={(event) =>
+        profileSubmitHandler(
+          event,
+          selectedGenres,
+          selectedActors,
+          userId,
+          onCreateProfile
+        )
+      }
+    >
       <input
         type="text"
         placeholder="Search genres..."
@@ -90,7 +65,10 @@ const ProfileForm = ({ genres, actors, onCreateProfile }) => {
       ) : (
         <ul>
           {selectedGenres.map((genre, index) => (
-            <li key={index} onClick={() => removeGenre(index)}>
+            <li
+              key={index}
+              onClick={() => removeGenre(index, setSelectedGenres)}
+            >
               {genre}
             </li>
           ))}
@@ -134,7 +112,10 @@ const ProfileForm = ({ genres, actors, onCreateProfile }) => {
       ) : (
         <ul>
           {selectedActors.map((actor, index) => (
-            <li key={index} onClick={() => removeActor(index)}>
+            <li
+              key={index}
+              onClick={() => removeActor(index, setSelectedActors)}
+            >
               {actor}
             </li>
           ))}

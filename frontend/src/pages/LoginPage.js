@@ -1,44 +1,18 @@
 import { useState } from "react";
 import classes from "./LoginPage.module.css";
+import { submitHandlerLogin } from "../functions/loginPageFunctions";
 
-const LoginPage = ({ onAuth, onSignUp }) => {
+const LoginPage = ({ onAuth, onLogin }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [receivedData, setReceivedData] = useState();
-
-  const submitHandler = (event) => {
-    event.preventDefault();
-    const form = event.target;
-
-    fetch(form.action, {
-      method: "POST",
-      body: new URLSearchParams(new FormData(form)),
-    })
-      .then((response) => {
-        console.log(response.status);
-        return response.json();
-      })
-      .then((data) => {
-        console.log(data);
-        onAuth(data);
-        setReceivedData(data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  };
-
-  const signUpHandler = (event) => {
-    //console.log(event.target);
-    onSignUp(false);
-  };
 
   return (
     <>
       <form
         action="/login"
         method="POST"
-        onSubmit={(event) => submitHandler(event)}
+        onSubmit={(event) => submitHandlerLogin(event, onAuth, setReceivedData)}
         className={classes.container}
       >
         <label className={classes.label}>
@@ -71,7 +45,7 @@ const LoginPage = ({ onAuth, onSignUp }) => {
           <p className={classes.errorMessage}>{receivedData.message}</p>
         )}
       </form>
-      <button className={classes.button} onClick={signUpHandler}>
+      <button className={classes.button} onClick={() => onLogin(false)}>
         Sign up here
       </button>
     </>

@@ -1,5 +1,4 @@
 import random
-from abc import ABC
 
 import numpy as np
 import pandas as pd
@@ -8,14 +7,15 @@ from sklearn.metrics.pairwise import cosine_similarity
 from surprise import Reader, Dataset, SVD
 from surprise.model_selection import cross_validate
 
+from backend.database.Database.Database import Database
 from backend.database.mysql_constants import SELECT_RATINGS_SQL
 from backend.recsys.AbstractRecSys import AbstractRecSys
 
 
-class TestRecSys(AbstractRecSys, ABC):
+class TestRecSys(AbstractRecSys):
 
     @staticmethod
-    def prepare_movies(movies_df):
+    def prepare_movies(movies_df: pd.DataFrame) -> pd.DataFrame:
         movies = pd.DataFrame()
         movies['id'] = movies_df['movieId']
         movies['title'] = movies_df['title']
@@ -30,14 +30,14 @@ class TestRecSys(AbstractRecSys, ABC):
         return movies
 
     @staticmethod
-    def get_similarities_tfidf(movies):
+    def get_similarities_tfidf(movies: pd.DataFrame) -> list:
         tfidf = TfidfVectorizer(max_features=5000, stop_words='english')
         vectorized_data = tfidf.fit_transform(movies['tags'])
         similarity = cosine_similarity(vectorized_data)
         return similarity
 
     @classmethod
-    def contents_based_recommender(cls, movies, genres, actors, how_many=15):
+    def contents_based_recommender(cls, movies: pd.DataFrame, genres: list, actors: list, how_many: int = 15) -> list:
         # TODO: not good enough
         # Convert actors array to a single string without spaces
         actors = ' '.join([actor.replace(' ', '') for actor in actors])
@@ -61,12 +61,13 @@ class TestRecSys(AbstractRecSys, ABC):
         return recommended_movies
 
     @classmethod
-    def generate_recommendation(cls, user_id=None, actors=None, genres=None, top_n=15):
-        connection = cls.get_connection()
+    def generate_recommendation(cls, user_id: [None, int] = None, actors: list = None, genres: list = None,
+                                top_n: int = 15) -> list:
+        connection = Database.get_connection()
         if connection:
             try:
                 if user_id is None:
-                    movies_df = cls.read_mysql_to_dataframe(query="SELECT * FROM movies")
+                    movies_df = Database.read_mysql_to_dataframe(query="SELECT * FROM movies")
                     movies = cls.prepare_movies(movies_df)
                     recommended_movies = cls.contents_based_recommender(movies, genres, actors)
                     return recommended_movies
@@ -75,7 +76,7 @@ class TestRecSys(AbstractRecSys, ABC):
                     np.random.seed(0)
                     random.seed(0)
 
-                    ratings_df = cls.read_mysql_to_dataframe(query=SELECT_RATINGS_SQL)
+                    ratings_df = Database.read_mysql_to_dataframe(query=SELECT_RATINGS_SQL)
                     reader = Reader(rating_scale=(1, 5))
                     data = Dataset.load_from_df(ratings_df[['userId', 'movieId', 'rating']], reader)
 
@@ -99,7 +100,7 @@ class TestRecSys(AbstractRecSys, ABC):
                     print(f"recommended movies: {recommended_movies}")
                     return recommended_movies
             finally:
-                cls.close_connection()
+                Database.close_connection()
         else:
             print("Failed to connect to MySQL.")
             return []
