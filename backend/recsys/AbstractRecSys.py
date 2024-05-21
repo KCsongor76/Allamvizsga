@@ -5,16 +5,18 @@ import pandas as pd
 
 from backend.database.Database.Database import Database
 from backend.database.mysql_constants import SELECT_MOVIE_BY_ID_SQL
+# TODO: generalize actor/genre getter functions?
 
 
 class AbstractRecSys(ABC):
     @classmethod
     def get_movie_by_id(cls, movie_id: int) -> Union[None, tuple]:
-        query = SELECT_MOVIE_BY_ID_SQL
-        cursor = Database.get_connection().cursor()
-        cursor.execute(query, (movie_id,))
-        movie = cursor.fetchone()
-        cursor.close()
+        """
+        Fetches the database for a movie by a given movieId, and returns the movie.
+        :param movie_id:
+        :return:
+        """
+        movie = Database.db_process(query=SELECT_MOVIE_BY_ID_SQL, params=(movie_id,))
         return movie
 
     @staticmethod
@@ -36,6 +38,12 @@ class AbstractRecSys(ABC):
 
     @classmethod
     def get_movies_by_id_list(cls, movie_id_list: list[int]) -> list[dict]:
+        """
+        Fetches the database multiple times for movies given a list of movieIds,
+        and return a list of movies (type dict).
+        :param movie_id_list:
+        :return:
+        """
         movies = []
         for movie_id in movie_id_list:
             movie = cls.get_movie_by_id(movie_id)
@@ -57,6 +65,11 @@ class AbstractRecSys(ABC):
 
     @classmethod
     def get_unique_genres(cls) -> list[str]:
+        """
+        Fetches the database for all genres, and returns every unique genre
+        in a list via the extract_genres class method.
+        :return:
+        """
         genres_df = Database.read_mysql_to_dataframe("SELECT genre FROM movies")
         if genres_df is not None:
             return cls.extract_genres(genres_df)
@@ -70,6 +83,11 @@ class AbstractRecSys(ABC):
 
     @classmethod
     def get_unique_actors(cls) -> list[str]:
+        """
+        Fetches the database for all actors, and returns every unique actor
+        in a list via the extract_actors class method.
+        :return:
+        """
         actors_df = Database.read_mysql_to_dataframe("SELECT actors FROM movies")
         if actors_df is not None:
             return cls.extract_actors(actors_df)

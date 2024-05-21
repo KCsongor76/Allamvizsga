@@ -12,9 +12,18 @@ app = Flask(__name__)
 
 
 # TODO: sql injection, xss, ...,  prevention
+# TODO: password hash
 
 @app.route("/signup", methods=["POST"])
 def signup():
+    """
+    Handles the SignUpForm submission. \n
+    Unsuccessful -> sends a message and status code to the frontend. \n
+    Successful -> sends all the actors, genres from the database,
+    and the associated user_id (which is previous max(user_id) + 1), and a status code \n
+    Also, inserts the initial user information to the database.
+    :return:
+    """
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'password_confirmation' in request.form:
         username = request.form['username']
         password = request.form['password']
@@ -23,6 +32,7 @@ def signup():
         if username == "":
             return jsonify({"message": "Fill in the username!"}), 401
         try:
+            # Fetches database to determine if the given username is unique
             user_id = Database.db_process(query=SELECT_USER_ID_BY_USERNAME_SQL, params=(username,))
             if user_id is not None:
                 return jsonify({"message": "This username already exists!"}), 401
@@ -33,6 +43,7 @@ def signup():
             if password != password_confirmation:
                 return jsonify({"message": "The passwords aren't the same."}), 401
 
+            # Fetches database for the currently maximum user_id
             row = Database.db_process(query=SELECT_MAX_USER_ID_SQL)
             if row is not None:
                 user_id = row[0] + 1
@@ -42,6 +53,7 @@ def signup():
             actors = TestRecSys.get_unique_actors()
             genres = TestRecSys.get_unique_genres()
 
+            # Inserting user data into database (id, username, password)
             Database.db_process(query=INSERT_INTO_USERS_SQL,
                                 params=(user_id, username, password),
                                 fetchone=False,
@@ -49,7 +61,6 @@ def signup():
 
             return jsonify(
                 {
-                    "type": "signup",
                     "actors": actors,
                     "genres": genres,
                     "user_id": user_id
@@ -63,8 +74,63 @@ def signup():
         return jsonify({'message': 'Bad request.'}), 400  # Bad Request
 
 
+@app.route('/create_profile', methods=['POST'])
+def create_profile():
+    """
+    After successful sign up, and choosing the genres and actors on the frontend,
+    handles these submitted data. \n
+    Unsuccessful -> if no actors or genres are selected
+    Successful -> based on the created user profile, generates the recommendation list,
+    inserts user data into database.
+    :return:
+    """
+    try:
+        if "selectedData" not in request.form:
+            return jsonify({"error": "Missing 'selectedData' in form data."}), 400
+
+        selected_data = json.loads(request.form['selectedData'])
+        selected_genres = selected_data['selectedGenres']
+        selected_actors = selected_data['selectedActors']
+        user_id = selected_data['userId']  # TODO: coding convention... (user_id vs userId from React)?
+
+        # Check if genres or actors are selected
+        if not selected_actors or not selected_genres:
+            return jsonify({"message": "No genres or actors selected"}), 400
+
+        # Generate movie recommendations based on selected genres and actors
+        recommended_movies = TestRecSys.generate_recommendation(actors=selected_actors, genres=selected_genres)
+
+        # Format selected genres and actors
+        # TODO:
+        actors = ' '.join([actor.replace(' ', '') for actor in selected_actors])
+        genres = ' '.join([genre.replace(' ', '') for genre in selected_genres])
+
+        # Update user profile in the database
+        Database.db_process(query=UPDATE_PROFILE_SQL,
+                            params=(actors, genres, user_id),
+                            fetchone=False,
+                            commit_needed=True)
+
+        return jsonify({
+            'message': 'Profile created successfully',
+            'movies': recommended_movies,
+            "genres": selected_genres,
+            "actors": selected_actors,
+            "user_id": user_id
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/login", methods=['POST'])
 def login():
+    """
+    Handles user login. \n
+    Unsuccessful -> sends message to frontend. \n
+    Successful -> generates the recommendation, and sends the movies to the frontend.
+    :return:
+    """
     try:
         # Validate request method and form data
         if request.method != 'POST' or 'username' not in request.form or 'password' not in request.form:
@@ -93,49 +159,12 @@ def login():
         return jsonify({'message': 'A server error has occurred'}), 500  # Internal Server Error
 
 
-@app.route('/create_profile', methods=['POST'])
-def create_profile():
-    try:
-        # Validate request form data
-        if "selectedData" not in request.form:
-            return jsonify({"error": "Missing 'selectedData' in form data."}), 400
-
-        selected_data = json.loads(request.form['selectedData'])
-        selected_genres = selected_data['selectedGenres']
-        selected_actors = selected_data['selectedActors']
-        user_id = selected_data['userId']  # TODO: coding convention... (user_id vs userId from React) ?
-
-        # Check if genres or actors are selected
-        if not selected_actors or not selected_genres:
-            return jsonify({"message": "No genres or actors selected"}), 400
-
-        # Generate movie recommendations based on selected genres and actors
-        recommended_movies = TestRecSys.generate_recommendation(actors=selected_actors, genres=selected_genres)
-
-        # Format selected genres and actors
-        actors = ' '.join([actor.replace(' ', '') for actor in selected_actors])
-        genres = ' '.join([genre.replace(' ', '') for genre in selected_genres])
-
-        # Update user profile in the database
-        Database.db_process(query=UPDATE_PROFILE_SQL,
-                            params=(actors, genres, user_id),
-                            fetchone=False,
-                            commit_needed=True)
-
-        return jsonify({
-            'message': 'Profile created successfully',
-            'movies': recommended_movies,
-            "genres": selected_genres,
-            "actors": selected_actors,
-            "user_id": user_id
-        }), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
 @app.route("/update_rating", methods=["PUT"])
 def update_rating():
+    """
+    Updates selected movie's rating for the selected user.
+    :return:
+    """
     try:
         # Validate request form data
         if "userId" not in request.form or "movieId" not in request.form or "rating" not in request.form:
@@ -161,6 +190,10 @@ def update_rating():
 
 @app.route("/delete_rating", methods=["DELETE"])
 def delete_rating():
+    """
+    Deletes selected movie's rating for the selected user.
+    :return:
+    """
     try:
         # Validate request form data
         if "userId" not in request.form or "movieId" not in request.form:
@@ -182,6 +215,10 @@ def delete_rating():
 
 @app.route("/add_rating", methods=["POST"])
 def add_rating():
+    """
+    Adds rating to selected movie by selected user.
+    :return:
+    """
     try:
         # Validate request form data
         if "userId" not in request.form or "movieId" not in request.form or "rating" not in request.form:
@@ -207,6 +244,10 @@ def add_rating():
 
 @app.route("/get_rating_by_ids", methods=["POST"])
 def get_rating_by_ids():
+    """
+    Given the user and movie ids, returns the given rating, if exists.
+    :return:
+    """
     try:
         # Validate request JSON
         if "userId" not in request.json or "movieId" not in request.json:
@@ -217,15 +258,10 @@ def get_rating_by_ids():
         # Fetch rating from the database
         rating = Database.db_process(query=SELECT_RATING_MOVIE_USER_ID_SQL, params=(movie_id, user_id))
 
-        # If rating exists, convert it to float
         if rating is not None:
             rating = float(rating[0])
-
-        # Return the rating if it's a float or an integer
         if isinstance(rating, (float, int)):
             return jsonify({"type": "get_rating_by_ids", "rating": rating}), 200
-
-        # If no rating found, return a message
         return jsonify({"type": "get_rating_by_ids", "message": "No rating yet"}), 200
 
     except Exception as e:
@@ -234,6 +270,10 @@ def get_rating_by_ids():
 
 @app.route("/get_username_by_id", methods=["POST"])
 def get_username_by_id():
+    """
+    Returns the username by the given user id.
+    :return:
+    """
     try:
         # Validate request JSON
         if "userId" not in request.json:
@@ -253,6 +293,10 @@ def get_username_by_id():
 
 @app.route("/get_user_stats", methods=["POST"])
 def get_user_stats():
+    """
+    Returns some stats from the user's profile, activity.
+    :return:
+    """
     try:
         # Validate request JSON
         if "userId" not in request.json:

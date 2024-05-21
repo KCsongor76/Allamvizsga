@@ -61,4 +61,5 @@ LOGIN_SQL = "SELECT userId FROM users WHERE username = %s AND password = %s"
 
 UPDATE_PROFILE_SQL = "UPDATE users SET actors_profile = %s, genres_profile = %s WHERE userId = %s"
 UPDATE_RATINGS_SQL = "UPDATE ratings SET rating = %s, timestamp = %s WHERE userId = %s AND movieId = %s"
+
 DELETE_RATING_SQL = "DELETE FROM ratings WHERE userId = %s AND movieId = %s"

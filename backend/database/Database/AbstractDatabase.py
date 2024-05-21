@@ -37,7 +37,8 @@ class AbstractDatabase(ABC):
     @abstractmethod
     def read_mysql_to_dataframe(cls, query: str) -> pd.DataFrame:
         """
-        Given the query parameter, executes an SQL query returning the data in a Dataframe.
+        Given the query parameter, executes an SQL query returning the data in a Dataframe. \n
+        Mostly used for the Surprise library based recommendation algorithms.
         :param query:
         :return:
         """
@@ -47,11 +48,12 @@ class AbstractDatabase(ABC):
     @abstractmethod
     def db_process(cls, query: str, fetchone: bool, params: tuple, commit_needed: bool):
         """
-        Open: connection, cursor \n
-        Do: cursor.execute() (with or without params) \n
-        Do: data = cursor.fetchone/fetchall OR connection.commit() - no return value \n
+        Handles communication with the database. \n
+        Opens: connection, cursor \n
+        Do: cursor.execute() (query, with or without params) \n
+        Do: data = cursor.fetchone()/fetchall() OR connection.commit() - no return value with commit \n
         Close: cursor, connection \n
-        return data
+        return data (if no commit)
 
         :param query:
         :param fetchone:

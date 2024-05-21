@@ -16,9 +16,7 @@ function App() {
   const [isAuth, setIsAuth] = useState(false);
   const [recommendedMovies, setRecommendedMovies] = useState([]);
   const [userId, setUserId] = useState(-1);
-  //console.log("recMovies: ", recommendedMovies);
-  //console.log("recMovies: ", JSON.stringify(recommendedMovies));
-
+  
   const router = createBrowserRouter([
     {
       path: "/",
