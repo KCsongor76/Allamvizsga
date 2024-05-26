@@ -43,7 +43,7 @@ export const removeGenre = (index, setSelectedGenres) => {
 export const removeActor = (index, setSelectedActors) => {
   setSelectedActors((prevActors) => {
     const newActors = [...prevActors];
-    newActors.splice(index, 1); // Remove the genre at the given index
+    newActors.splice(index, 1); // Remove the actor at the given index
     return newActors;
   });
 };

@@ -5,7 +5,7 @@ from flask import Flask, jsonify, request
 
 from backend.database.Database.Database import Database
 from backend.recsys.AbstractRecSys import AbstractRecSys
-from backend.recsys.TestRecSys import TestRecSys
+from backend.recsys.RecSys import RecSys
 from database.mysql_constants import *
 
 app = Flask(__name__)
@@ -50,8 +50,8 @@ def signup():
             else:
                 user_id = 1
 
-            actors = TestRecSys.get_unique_actors()
-            genres = TestRecSys.get_unique_genres()
+            actors = RecSys.get_unique_actors()
+            genres = RecSys.get_unique_genres()
 
             # Inserting user data into database (id, username, password)
             Database.db_process(query=INSERT_INTO_USERS_SQL,
@@ -92,24 +92,22 @@ def create_profile():
         selected_genres = selected_data['selectedGenres']
         selected_actors = selected_data['selectedActors']
         user_id = selected_data['userId']  # TODO: coding convention... (user_id vs userId from React)?
-
         # Check if genres or actors are selected
         if not selected_actors or not selected_genres:
             return jsonify({"message": "No genres or actors selected"}), 400
-
-        # Generate movie recommendations based on selected genres and actors
-        recommended_movies = TestRecSys.generate_recommendation(actors=selected_actors, genres=selected_genres)
 
         # Format selected genres and actors
         # TODO:
         actors = ' '.join([actor.replace(' ', '') for actor in selected_actors])
         genres = ' '.join([genre.replace(' ', '') for genre in selected_genres])
-
         # Update user profile in the database
         Database.db_process(query=UPDATE_PROFILE_SQL,
                             params=(actors, genres, user_id),
                             fetchone=False,
                             commit_needed=True)
+
+        # Generate movie recommendations based on selected genres and actors
+        recommended_movies = RecSys.generate_recommendation(user_id=user_id)
 
         return jsonify({
             'message': 'Profile created successfully',
@@ -145,7 +143,7 @@ def login():
         # If user ID exists, generate movie recommendations for the user
         if user_id:
             user_id = user_id[0]
-            recommended_movies = TestRecSys.generate_recommendation(user_id)
+            recommended_movies = RecSys.generate_recommendation(user_id)
             return jsonify({
                 'message': 'Successful login!',
                 'movies': recommended_movies,

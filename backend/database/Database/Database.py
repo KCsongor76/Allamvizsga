@@ -40,6 +40,7 @@ class Database(AbstractDatabase):
 
     @classmethod
     def read_mysql_to_dataframe(cls, query: str) -> pd.DataFrame:
+        # TODO: db_process
         try:
             cursor = cls.get_connection().cursor()
             cursor.execute(query)
@@ -53,24 +54,33 @@ class Database(AbstractDatabase):
 
     @classmethod
     def db_process(cls, query: str, fetchone: bool = True, commit_needed: bool = False, params: tuple | None = None):
-        # TODO: maybe decorator approach?
         connection = cls.get_connection()
         cursor = connection.cursor()
 
-        if params is None:
-            cursor.execute(query)
-        else:
-            cursor.execute(query, params)
+        try:
+            if params is None:
+                cursor.execute(query)
+            else:
+                cursor.execute(query, params)
 
-        data = None
-        if commit_needed:
-            connection.commit()
-        elif fetchone:
-            data = cursor.fetchone()
-        else:
-            data = cursor.fetchall()
+            data = None
+            if commit_needed:
+                connection.commit()
+            elif fetchone:
+                # Fetch one row
+                data = cursor.fetchone()
+                # Consume all remaining rows to avoid InternalError
+                while cursor.fetchone():
+                    continue
+            else:
+                # Fetch all rows
+                data = cursor.fetchall()
 
-        cursor.close()
-        cls.close_connection()
+        finally:
+            # Ensure the cursor is closed even if an error occurs
+            cursor.close()
+            # Close the connection
+            cls.close_connection()
 
         return data
+

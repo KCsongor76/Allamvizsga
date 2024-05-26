@@ -57,6 +57,7 @@ SELECT_MAX_USER_ID_SQL = "SELECT MAX(userId) FROM users"
 SELECT_USER_ID_BY_USERNAME_SQL = "SELECT userId FROM users WHERE username = %s LIMIT 1"
 SELECT_USERNAME_BY_USER_ID_SQL = "SELECT username FROM users WHERE userId = %s"
 SELECT_PROFILE_DATA_BY_USER_ID_SQL = "SELECT actors_profile, genres_profile FROM users WHERE userId = %s"
+SELECT_MOST_POPULAR_RECOMMENDATIONS_SQL = "SELECT * FROM movies ORDER BY imdb_rating DESC LIMIT %s"
 LOGIN_SQL = "SELECT userId FROM users WHERE username = %s AND password = %s"
 
 UPDATE_PROFILE_SQL = "UPDATE users SET actors_profile = %s, genres_profile = %s WHERE userId = %s"
