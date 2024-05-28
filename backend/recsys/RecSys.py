@@ -4,6 +4,7 @@ import random
 import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from surprise import Reader, Dataset, SVD, KNNBaseline
 from surprise.model_selection import cross_validate
@@ -15,6 +16,38 @@ from pathlib import Path
 
 
 class RecSys(AbstractRecSys):
+
+    @staticmethod
+    def get_similarities_tfidf(movies: pd.DataFrame) -> list:
+        tfidf = TfidfVectorizer(max_features=5000, stop_words='english')
+        vectorized_data = tfidf.fit_transform(movies['tags'])
+        similarity = cosine_similarity(vectorized_data)
+        return similarity
+
+    @classmethod
+    def tfidf_recommender(cls, movies: pd.DataFrame, genres: list, actors: list, how_many: int = 15) -> list:
+        # TODO: not good enough
+        # Convert actors array to a single string without spaces
+        actors = ' '.join([actor.replace(' ', '') for actor in actors])
+        # Calculate TF-IDF similarities
+        similarity_matrix = cls.get_similarities_tfidf(movies)
+        given_genres = genres
+        # Filter movies by genres
+        relevant_movies = movies[movies['genre'].apply(lambda x: all(genre in x for genre in given_genres))]
+        # Filter further by actors
+        relevant_movies = relevant_movies[relevant_movies['actors'].str.contains(actors)]
+        # Get indices of relevant movies
+        movie_indices = relevant_movies.index
+        # Calculate mean similarity score for each movie
+        mean_similarity_scores = similarity_matrix[movie_indices].mean(axis=0)
+        # Get indices of top recommended movies
+        top_indices = mean_similarity_scores.argsort()[::-1][:how_many]
+        print(top_indices.tolist())
+        # Get detailed movie data using movie IDs
+        recommended_movies = cls.get_movies_by_id_list(top_indices.tolist())
+        print(f"recommended movies: {recommended_movies}")
+        return recommended_movies
+
     @classmethod
     def content_based_recommender(cls, movies: pd.DataFrame,
                                   genres: list = None,
@@ -133,7 +166,7 @@ class RecSys(AbstractRecSys):
             movies_df = Database.read_mysql_to_dataframe(query="SELECT * FROM movies")
             movies = cls.prepare_movies(movies_df)
             content_based_movies = cls.content_based_recommender(movies, genres, actors, 5)
-            recommended_movies = list(content_based_movies) + list(popular_movies_dict)
+            recommended_movies = list(content_based_movies) + list(popular_movies_dict)[:5]
             return recommended_movies
 
     @classmethod
@@ -145,14 +178,14 @@ class RecSys(AbstractRecSys):
         knn_user_params = {'k': 40, 'sim_options': {'name': 'msd', 'min_support': 3, 'user_based': True},
                            'bsl_options': {'method': 'sgd'}}
         collaborative_movies = cls.collaborative_filter_recommender(algo_class=KNNBaseline, params=knn_user_params,
-                                                                    user_id=user_id, top_n=6)
+                                                                    user_id=user_id, top_n=10)
         recommended_movies = collaborative_movies
-        if actors is not None and genres is not None:
-            print("profile yes")
-            movies_df = Database.read_mysql_to_dataframe(query="SELECT * FROM movies")
-            movies = cls.prepare_movies(movies_df)
-            content_based_movies = cls.content_based_recommender(movies=movies, top_n=4)
-            recommended_movies += content_based_movies
+        # if actors is not None and genres is not None:
+        #     print("profile yes")
+        #     movies_df = Database.read_mysql_to_dataframe(query="SELECT * FROM movies")
+        #     movies = cls.prepare_movies(movies_df)
+        #     content_based_movies = cls.content_based_recommender(movies=movies, top_n=4)
+        #     recommended_movies += content_based_movies
         return recommended_movies
 
     @classmethod
@@ -163,14 +196,14 @@ class RecSys(AbstractRecSys):
         # jupyter notebook - grid_search_with_figs
         svd_params = {'n_factors': 160, 'n_epochs': 100, 'lr_all': 0.008, 'reg_all': 0.1}
         collaborative_movies = cls.collaborative_filter_recommender(algo_class=SVD, params=svd_params,
-                                                                    user_id=user_id, top_n=6)
+                                                                    user_id=user_id, top_n=10)
         recommended_movies = collaborative_movies
-        if actors is not None and genres is not None:
-            print("profile yes")
-            movies_df = Database.read_mysql_to_dataframe(query="SELECT * FROM movies")
-            movies = cls.prepare_movies(movies_df)
-            content_based_movies = cls.content_based_recommender(movies=movies, top_n=4)
-            recommended_movies += content_based_movies
+        # if actors is not None and genres is not None:
+        #     print("profile yes")
+        #     movies_df = Database.read_mysql_to_dataframe(query="SELECT * FROM movies")
+        #     movies = cls.prepare_movies(movies_df)
+        #     content_based_movies = cls.content_based_recommender(movies=movies, top_n=4)
+        #     recommended_movies += content_based_movies
         return recommended_movies
 
     @classmethod
