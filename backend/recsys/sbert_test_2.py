@@ -5,10 +5,10 @@ import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 from backend.database.Database.Database import Database
-from backend.recsys.RecSys import RecSys
+from backend.recsys.Movie import Movie
 
 movies_df = Database.read_mysql_to_dataframe(query="SELECT * FROM movies")
-movies = RecSys.prepare_movies(movies_df)
+movies = Movie.prepare_movies(movies_df)
 movies['combined_features'] = movies['genre'] + ' ' + movies['actors']
 combined_features = np.array(movies['combined_features'])
 
@@ -68,7 +68,7 @@ def get_recommendations(genres, actors, N=10):
     for _title in titles:
         movie = Database.db_process(query="SELECT * FROM movies WHERE title = %s",
                                     params=(_title,))
-        movies.append(RecSys.movie_to_dict(movie))
+        movies.append(Movie.movie_to_dict(movie))
     return movies
 
 

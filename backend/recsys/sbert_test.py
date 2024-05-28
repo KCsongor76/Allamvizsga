@@ -3,8 +3,7 @@ import pickle
 import pandas as pd
 
 from backend.database.Database.Database import Database
-from backend.database.mysql_constants import SELECT_MOST_POPULAR_RECOMMENDATIONS_SQL
-from backend.recsys.RecSys import RecSys
+from backend.recsys.Movie import Movie
 
 
 def get_recommendations(indices, cos_sim_data, data, title, top_n):
@@ -20,7 +19,7 @@ def get_recommendations(indices, cos_sim_data, data, title, top_n):
     for _title in titles:
         movie = Database.db_process(query="SELECT * FROM movies WHERE title = %s",
                                     params=(_title,))
-        movies.append(RecSys.movie_to_dict(movie))
+        movies.append(Movie.movie_to_dict(movie))
     return movies
 
 

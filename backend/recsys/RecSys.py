@@ -9,10 +9,12 @@ from sklearn.metrics.pairwise import cosine_similarity
 from surprise import Reader, Dataset, SVD, KNNBaseline
 from surprise.model_selection import cross_validate
 from backend.database.Database.Database import Database
-from backend.database.mysql_constants import SELECT_RATINGS_SQL, SELECT_STATS_BY_USER_ID, \
-    SELECT_MOST_POPULAR_RECOMMENDATIONS_SQL, SELECT_PROFILE_DATA_BY_USER_ID_SQL
+from backend.database.mysql_constants import SELECT_RATINGS_SQL, SELECT_MOST_POPULAR_RECOMMENDATIONS_SQL
 from backend.recsys.AbstractRecSys import AbstractRecSys
 from pathlib import Path
+
+from backend.recsys.Movie import Movie
+from backend.recsys.User import User
 
 
 class RecSys(AbstractRecSys):
@@ -44,7 +46,7 @@ class RecSys(AbstractRecSys):
         top_indices = mean_similarity_scores.argsort()[::-1][:how_many]
         print(top_indices.tolist())
         # Get detailed movie data using movie IDs
-        recommended_movies = cls.get_movies_by_id_list(top_indices.tolist())
+        recommended_movies = Movie.get_movies_by_id_list(top_indices.tolist())
         print(f"recommended movies: {recommended_movies}")
         return recommended_movies
 
@@ -115,7 +117,7 @@ class RecSys(AbstractRecSys):
             for _title in titles:
                 movie = Database.db_process(query="SELECT * FROM movies WHERE title = %s",
                                             params=(_title,))
-                movies.append(RecSys.movie_to_dict(movie))
+                movies.append(Movie.movie_to_dict(movie))
             return movies
 
         recommended_movies = get_recommendations(genres, actors, top_n)
@@ -146,7 +148,7 @@ class RecSys(AbstractRecSys):
         ids = []
         for i, movie in enumerate(top_movies):
             ids.append(movie.iid)
-        recommended_movies = cls.get_movies_by_id_list(ids)
+        recommended_movies = Movie.get_movies_by_id_list(ids)
         return recommended_movies
 
     @classmethod
@@ -157,14 +159,14 @@ class RecSys(AbstractRecSys):
                                              fetchone=False)
         popular_movies_dict = []
         for movie in popular_movies:
-            popular_movies_dict.append(cls.movie_to_dict(movie))
+            popular_movies_dict.append(Movie.movie_to_dict(movie))
 
         if actors is None and genres is None:
             print("only popular")
             return popular_movies_dict
         else:
             movies_df = Database.read_mysql_to_dataframe(query="SELECT * FROM movies")
-            movies = cls.prepare_movies(movies_df)
+            movies = Movie.prepare_movies(movies_df)
             content_based_movies = cls.content_based_recommender(movies, genres, actors, 5)
             recommended_movies = list(content_based_movies) + list(popular_movies_dict)[:5]
             return recommended_movies
@@ -208,11 +210,14 @@ class RecSys(AbstractRecSys):
 
     @classmethod
     def generate_recommendation(cls, user_id: int, top_n: int = 10) -> list[dict]:
-        user_stats = Database.db_process(query=SELECT_STATS_BY_USER_ID, params=(user_id,))
-        user_profile = Database.db_process(query=SELECT_PROFILE_DATA_BY_USER_ID_SQL, params=(user_id,))
-        count = user_stats[0]
-        actors = user_profile[0]
-        genres = user_profile[1]
+        user = User(user_id)
+        count, avg = user.get_user_stats()
+        actors, genres = user.get_user_profile()
+        # user_stats = Database.db_process(query=SELECT_STATS_BY_USER_ID, params=(user_id,))
+        # user_profile = Database.db_process(query=SELECT_PROFILE_DATA_BY_USER_ID_SQL, params=(user_id,))
+        # count = user_stats[0]
+        # actors = user_profile[0]
+        # genres = user_profile[1]
 
         print(f"count: {count}")
         print(f"actors: {actors}")
