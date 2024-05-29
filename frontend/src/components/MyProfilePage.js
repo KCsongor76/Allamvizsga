@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import { UserContext } from "../App";
 import Row from "./Row";
 
+import classes from "./MyProfilePage.module.css";
+
 const MyProfilePage = () => {
   const { username } = useParams();
   const userId = useContext(UserContext);
@@ -48,22 +50,29 @@ const MyProfilePage = () => {
   }
 
   return (
-    <div>
-      <h1>My Profile Page - {username}</h1>
-      {userStats && (
-        <>
-          <p>Actors: {userStats.actors ? userStats.actors : "None"}</p>
-          <p>Genres: {userStats.genres ? userStats.genres : "None"}</p>
-          <p>
-            # of rated movies: {userStats.stats ? userStats.stats.count : 0}
-          </p>
-          <p>
-            Your average rating: {userStats.stats ? userStats.stats.avg : "N/A"}
-          </p>
-          {userStats.movies && <Row movies={userStats.movies} isProfile={true} />}
-        </>
-      )}
-    </div>
+    <>
+      <div className={classes.profileContainer}>
+        <h1 className={classes.profileTitle}>My Profile Page - {username}</h1>
+        {userStats && (
+          <>
+            <p className={classes.profileText}>
+              Actors: {userStats.actors ? userStats.actors : "None"}
+            </p>
+            <p className={classes.profileText}>
+              Genres: {userStats.genres ? userStats.genres : "None"}
+            </p>
+            <p className={classes.stats}>
+              # of rated movies: {userStats.stats ? userStats.stats.count : 0}
+            </p>
+            <p className={classes.stats}>
+              Your average rating:{" "}
+              {userStats.stats ? userStats.stats.avg : "N/A"}
+            </p>
+          </>
+        )}
+      </div>
+      {userStats.movies && <Row movies={userStats.movies} isProfile={true} />}
+    </>
   );
 };
 

@@ -9,6 +9,7 @@
     background-color: #f8f8f8;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
 }
 
 /* Stylish Label */
@@ -24,7 +25,7 @@
     margin: 5px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    width: 100%;
+    width: 90%;
     transition: border-color 0.3s ease-in-out;
 }
 

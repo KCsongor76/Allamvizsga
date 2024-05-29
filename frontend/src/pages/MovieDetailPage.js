@@ -89,7 +89,7 @@ const DetailedMoviePage = () => {
               deleteRatingHandler(event, movie, userId, setRating)
             }
           >
-            <button type="submit">Delete rating</button>
+            <button style={{backgroundColor: 'red'}} type="submit">Delete rating</button>
           </form>
         </>
       )}

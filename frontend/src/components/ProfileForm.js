@@ -5,6 +5,8 @@ import {
   removeGenre,
 } from "../functions/profileFormFunctions";
 
+import classes from "./ProfileForm.module.css";
+
 const ProfileForm = ({ genres, actors, userId, onCreateProfile }) => {
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [selectedActors, setSelectedActors] = useState([]);
@@ -13,6 +15,7 @@ const ProfileForm = ({ genres, actors, userId, onCreateProfile }) => {
 
   return (
     <form
+      className={classes.formContainer}
       action="/create_profile"
       method="POST"
       onSubmit={(event) =>
@@ -26,6 +29,7 @@ const ProfileForm = ({ genres, actors, userId, onCreateProfile }) => {
       }
     >
       <input
+        className={classes.inputText}
         type="text"
         placeholder="Search genres..."
         value={searchGenres}
@@ -33,6 +37,7 @@ const ProfileForm = ({ genres, actors, userId, onCreateProfile }) => {
       ></input>
 
       <select
+        className={classes.inputText}
         onClick={(event) =>
           setSelectedGenres((prev) => {
             const newValue = event.target.value;
@@ -63,9 +68,10 @@ const ProfileForm = ({ genres, actors, userId, onCreateProfile }) => {
       {selectedGenres.length === 0 ? (
         <p>No selected genres.</p>
       ) : (
-        <ul>
+        <ul className={classes.ul}>
           {selectedGenres.map((genre, index) => (
             <li
+              className={classes.li}
               key={index}
               onClick={() => removeGenre(index, setSelectedGenres)}
             >
@@ -76,6 +82,7 @@ const ProfileForm = ({ genres, actors, userId, onCreateProfile }) => {
       )}
 
       <input
+        className={classes.inputText}
         type="text"
         placeholder="Search actors..."
         value={searchActors}
@@ -83,6 +90,7 @@ const ProfileForm = ({ genres, actors, userId, onCreateProfile }) => {
       ></input>
 
       <select
+        className={classes.select}
         onChange={(event) =>
           setSelectedActors((prev) => {
             const newValue = event.target.value;
@@ -110,9 +118,10 @@ const ProfileForm = ({ genres, actors, userId, onCreateProfile }) => {
       {selectedActors.length === 0 ? (
         <p>No selected genres.</p>
       ) : (
-        <ul>
+        <ul className={classes.ul}>
           {selectedActors.map((actor, index) => (
             <li
+              className={classes.li}
               key={index}
               onClick={() => removeActor(index, setSelectedActors)}
             >
@@ -122,7 +131,9 @@ const ProfileForm = ({ genres, actors, userId, onCreateProfile }) => {
         </ul>
       )}
 
-      <button type="submit">Create profile!</button>
+      <button className={classes.button} type="submit">
+        Create profile!
+      </button>
     </form>
   );
 };

@@ -27,7 +27,7 @@ const MainPage = ({ recommendedMovies }) => {
 
   return (
     <>
-      <p>Welcome back, {username}!</p>
+      <p style={{ color: "white" }}>Welcome back, {username}!</p>
       <h2 style={{ color: "white" }}>Recommended Movies For You:</h2>
       <Row movies={movieDataArray} isProfile={false} />
     </>
