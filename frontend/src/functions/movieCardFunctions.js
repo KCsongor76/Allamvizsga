@@ -1,5 +1,12 @@
 // MovieComponent.js
-export const navigateHandler = (index, userId, item, isProfile, navigate) => {
+export const navigateHandler = (
+  index,
+  username,
+  userId,
+  item,
+  isProfile,
+  navigate
+) => {
   const requestData = {
     userId: userId,
     movieId: item.id,
@@ -24,7 +31,8 @@ export const navigateHandler = (index, userId, item, isProfile, navigate) => {
       if (data.rating) {
         navigate(`/${index}`, {
           state: {
-            userId: userId,
+            //username: username,
+            //userId: userId,
             movie: item,
             rating: data.rating, // Use the updated rating here
             isProfile: isProfile,
@@ -34,7 +42,8 @@ export const navigateHandler = (index, userId, item, isProfile, navigate) => {
         // If there's no rating data, navigate without updating rating
         navigate(`${index}`, {
           state: {
-            userId: userId,
+            //username: username,
+            //userId: userId,
             movie: item,
             isProfile: isProfile,
           },

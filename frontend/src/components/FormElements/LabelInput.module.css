@@ -1,0 +1,18 @@
+.label {
+    margin: 10px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.input {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 90%;
+    transition: border-color 0.3s ease-in-out;
+    max-width: 600px;
+}
+
+.input:focus {
+    border-color: #007bff;
+}

@@ -9,6 +9,7 @@ from controller.add_rating_controller import add_rating_controller
 from controller.get_rating_by_ids_controller import get_rating_by_ids_controller
 from controller.get_username_by_id_controller import get_username_by_id_controller
 from controller.get_user_stats_controller import get_user_stats_controller
+from controller.get_all_movies_controller import get_all_movies_controller
 
 app = Flask(__name__)
 
@@ -59,6 +60,11 @@ def get_username_by_id():
 @app.route("/get_user_stats", methods=["POST"])
 def get_user_stats():
     return get_user_stats_controller()
+
+
+@app.route("/get_all_movies", methods=["GET"])
+def get_all_movies():
+    return get_all_movies_controller()
 
 
 if __name__ == '__main__':

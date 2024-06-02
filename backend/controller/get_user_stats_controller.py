@@ -14,6 +14,11 @@ def get_user_stats_controller():
             return jsonify({"error": "Missing 'userId' in request."}), 400
         user_id = request.json["userId"]
 
+        print(user_id)
+
+        if user_id == -1:
+            return jsonify({'message': 'User not found.'}), 404
+
         user = User(user_id)
         actors, genres = user.get_user_profile()
         count, avg = user.get_user_stats()

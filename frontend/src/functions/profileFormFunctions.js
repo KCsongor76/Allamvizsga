@@ -4,7 +4,8 @@ export const profileSubmitHandler = (
   selectedGenres,
   selectedActors,
   userId,
-  onCreateProfile
+  onCreateProfile,
+  username
 ) => {
   event.preventDefault();
   const form = event.target;
@@ -26,8 +27,11 @@ export const profileSubmitHandler = (
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log(data);
-      onCreateProfile(data);
+      console.log({ ...data, username });
+      if (data.message) {
+        alert(data.message + "!");
+      }
+      onCreateProfile({ ...data, username });
     })
     .catch((error) => console.error("Error:", error));
 };
@@ -45,5 +49,19 @@ export const removeActor = (index, setSelectedActors) => {
     const newActors = [...prevActors];
     newActors.splice(index, 1); // Remove the actor at the given index
     return newActors;
+  });
+};
+
+export const selectGenres = (event, setSelectedGenres) => {
+  const newValue = event.target.value;
+  setSelectedGenres((prev) => {
+    return prev.includes(newValue) ? prev : [...prev, newValue];
+  });
+};
+
+export const selectActors = (event, setSelectedActors) => {
+  const newValue = event.target.value;
+  setSelectedActors((prev) => {
+    return prev.includes(newValue) ? prev : [...prev, newValue];
   });
 };

@@ -1,17 +1,11 @@
 import { NavLink } from "react-router-dom";
 import classes from "./MainNavigation.module.css";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { UserContext } from "../App";
-import { getUsernameById } from "../functions/mainPageFunctions";
 
 const MainNavigation = ({ onAuth }) => {
-  const userId = useContext(UserContext);
-  const [username, setUsername] = useState("");
-  console.log("MainNavigation");
+  const { username } = useContext(UserContext);
 
-  useEffect(() => {
-    getUsernameById(userId, setUsername);
-  }, [userId]);
 
   return (
     <nav className={classes.container}>

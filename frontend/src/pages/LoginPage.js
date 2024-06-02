@@ -1,6 +1,7 @@
 import { useState } from "react";
 import classes from "./LoginPage.module.css";
 import { submitHandlerLogin } from "../functions/loginPageFunctions";
+import LabelInput from "../components/FormElements/LabelInput";
 
 const LoginPage = ({ onAuth, onLogin }) => {
   const [username, setUsername] = useState("");
@@ -12,32 +13,30 @@ const LoginPage = ({ onAuth, onLogin }) => {
       <form
         action="/login"
         method="POST"
-        onSubmit={(event) => submitHandlerLogin(event, onAuth, setReceivedData)}
+        onSubmit={(event) => submitHandlerLogin(event, onAuth, setReceivedData, username)}
         className={classes.container}
       >
-        <label className={classes.label}>
-          Username
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-            className={classes.input}
-          />
-        </label>
+        <LabelInput
+          labelText="Username"
+          type="text"
+          id="username"
+          name="username"
+          value={username}
+          setter={setUsername}
+        />
 
-        <label className={classes.label}>
-          Password
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className={classes.input}
-          />
-        </label>
+        <LabelInput
+          labelText="Password"
+          type="password"
+          id="password"
+          name="password"
+          value={password}
+          setter={setPassword}
+        />
+
+        <p className={classes.link} onClick={() => onLogin(false)}>
+          Don't have an account yet? Sign up here!
+        </p>
         <button type="submit" className={classes.button}>
           Login
         </button>
@@ -45,9 +44,6 @@ const LoginPage = ({ onAuth, onLogin }) => {
           <p className={classes.errorMessage}>{receivedData.message}</p>
         )}
       </form>
-      <button className={classes.button} onClick={() => onLogin(false)}>
-        Sign up here
-      </button>
     </>
   );
 };

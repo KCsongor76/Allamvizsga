@@ -1,0 +1,43 @@
+.movieContainer {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    max-width: 600px;
+    margin: 0 auto;
+    margin-top: 50px;
+}
+
+.movieDetails {
+    flex: 1;
+    padding-right: 20px;
+}
+
+.title {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.description {
+    font-size: 16px;
+    color: #555;
+}
+
+.info {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 5px;
+}
+
+.movieActors {
+    font-style: italic;
+}
+
+.moviePoster {
+    max-width: 200px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}

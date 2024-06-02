@@ -1,4 +1,9 @@
-export const submitHandlerLogin = (event, onAuth, setReceivedData) => {
+export const submitHandlerLogin = (
+  event,
+  onAuth,
+  setReceivedData,
+  username
+) => {
   event.preventDefault();
   const form = event.target;
 
@@ -6,15 +11,10 @@ export const submitHandlerLogin = (event, onAuth, setReceivedData) => {
     method: "POST",
     body: new URLSearchParams(new FormData(form)),
   })
-    .then((response) => {
-      return response.json();
-    })
+    .then((response) => response.json())
     .then((data) => {
-      onAuth(data);
+      onAuth({ ...data, username });
       setReceivedData(data);
-      console.log("login handler executed")
     })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
+    .catch((error) => console.error("Error:", error));
 };

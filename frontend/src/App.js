@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import "./App.css";
@@ -8,15 +8,29 @@ import MovieDetailPage from "./pages/MovieDetailPage";
 import ErrorPage from "./pages/ErrorPage";
 import AuthPage from "./pages/AuthPage";
 import MyProfilePage from "./components/MyProfilePage";
-import { authHandler } from "./functions/appFunctions";
+import {
+  authHandler,
+  fetchAllMovies,
+  profileLoader,
+} from "./functions/appFunctions";
 
 export const UserContext = createContext();
 
 function App() {
   const [isAuth, setIsAuth] = useState(false);
   const [recommendedMovies, setRecommendedMovies] = useState([]);
+  const [allMovies, setAllMovies] = useState([]);
   const [userId, setUserId] = useState(-1);
-  
+  const [username, setUsername] = useState("");
+
+  console.log("username:", username);
+  console.log("userId:", userId);
+  console.log("allMovies:", allMovies);
+
+  useEffect(() => {
+    fetchAllMovies(setAllMovies);
+  }, []);
+
   const router = createBrowserRouter([
     {
       path: "/",
@@ -31,22 +45,37 @@ function App() {
         {
           path: "/users/:username",
           element: <MyProfilePage />,
+          loader: () => {
+            return profileLoader(userId);
+          },
         },
       ],
     },
   ]);
 
   return isAuth ? (
-    <UserContext.Provider value={userId}>
+    <UserContext.Provider value={{ userId, username, allMovies }}>
       <RouterProvider router={router} />
     </UserContext.Provider>
   ) : (
     <AuthPage
       onAuth={(data) =>
-        authHandler(data, setUserId, setIsAuth, setRecommendedMovies)
+        authHandler(
+          data,
+          setUserId,
+          setIsAuth,
+          setRecommendedMovies,
+          setUsername
+        )
       }
       onSignUp={(data) =>
-        authHandler(data, setUserId, setIsAuth, setRecommendedMovies)
+        authHandler(
+          data,
+          setUserId,
+          setIsAuth,
+          setRecommendedMovies,
+          setUsername
+        )
       }
       isLogin={true}
     />

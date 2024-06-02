@@ -24,7 +24,13 @@ const SignUpPage = ({ onSignUp }) => {
       setPassword={setPassword}
       setPasswordConf={setPasswordConf}
       submitHandler={(event) =>
-        submitHandlerSignUp(event, onSignUp, setReceivedData, setIsSignUp)
+        submitHandlerSignUp(
+          event,
+          onSignUp,
+          setReceivedData,
+          setIsSignUp,
+          username
+        )
       }
       loginHandler={loginHandler}
     />
@@ -34,6 +40,7 @@ const SignUpPage = ({ onSignUp }) => {
       actors={receivedData.actors}
       userId={receivedData.user_id}
       onCreateProfile={onSignUp[1]}
+      username={username}
     />
   );
 };

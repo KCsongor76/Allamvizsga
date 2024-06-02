@@ -1,36 +1,52 @@
 import React, { useState, useEffect } from "react";
 import classes from "./Row.module.css";
-import MovieComponent from "./MovieComponent";
-import { calculateItemsPerPage } from "../functions/rowFunctions";
+import MovieComponent from "./MovieCard";
+import {
+  calculateItemsPerPage,
+  handleNextClick,
+  handlePrevClick,
+} from "../functions/rowFunctions";
 
 const Row = ({ movies, isProfile }) => {
-  const itemsPerPage = calculateItemsPerPage(); // Calculate items per page based on resolution
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const itemsPerPage = calculateItemsPerPage(windowWidth); // Calculate items per page based on resolution
   const [currentPage, setCurrentPage] = useState(0);
   const totalPages = movies.length + 1 - itemsPerPage;
   const visibleItems = movies.slice(currentPage, currentPage + itemsPerPage);
-  console.log("visibleItems: ", visibleItems);
-
-  const handlePrevClick = () => {
-    setCurrentPage((prevPage) => Math.max(0, prevPage - 1));
-  };
-
-  const handleNextClick = () => {
-    setCurrentPage((prevPage) => Math.min(totalPages - 1, prevPage + 1));
-  };
 
   useEffect(() => {
     setCurrentPage(0);
-  }, [itemsPerPage, window.innerWidth]); // Reset current page when items per page change
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    // Add event listener for window resize
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup function to remove the event listener
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [itemsPerPage]); // Reset current page when items per page change
 
   return (
     <div className={classes.row_container}>
       <div className={classes.navigation_buttons}>
-        <button onClick={handlePrevClick} disabled={currentPage === 0}>
+        <button
+          onClick={() => handlePrevClick(setCurrentPage)}
+          disabled={currentPage === 0}
+          style={{ cursor: !(currentPage === 0) ? "pointer" : "default" }}
+        >
           {"<"}
         </button>
         <button
-          onClick={handleNextClick}
+          onClick={() => handleNextClick(totalPages, setCurrentPage)}
           disabled={currentPage === totalPages - 1 || totalPages <= 0}
+          style={{
+            cursor: !(currentPage === totalPages - 1 || totalPages <= 0)
+              ? "pointer"
+              : "default",
+          }}
         >
           {">"}
         </button>
@@ -38,7 +54,12 @@ const Row = ({ movies, isProfile }) => {
       <div className={classes.item_container}>
         {movies.length > 0 ? (
           visibleItems.map((item, index) => (
-            <MovieComponent key={index} item={item} index={index} isProfile={isProfile} />
+            <MovieComponent
+              key={index}
+              item={item}
+              index={index}
+              isProfile={isProfile}
+            />
           ))
         ) : (
           <p style={{ color: "red" }}>No Recommended Movies.</p>

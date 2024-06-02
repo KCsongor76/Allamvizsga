@@ -3,15 +3,103 @@ import {
   profileSubmitHandler,
   removeActor,
   removeGenre,
+  //selectActors,
+  //selectGenres,
 } from "../functions/profileFormFunctions";
 
 import classes from "./ProfileForm.module.css";
+import LabelInput from "./FormElements/LabelInput";
 
-const ProfileForm = ({ genres, actors, userId, onCreateProfile }) => {
+const ProfileForm = ({ genres, actors, userId, onCreateProfile, username }) => {
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [selectedActors, setSelectedActors] = useState([]);
   const [searchGenres, setSearchGenres] = useState("");
   const [searchActors, setSearchActors] = useState("");
+
+  const filteredGenres = genres
+    .filter((genre) => genre.toLowerCase().includes(searchGenres.toLowerCase()))
+    .sort((a, b) => a.localeCompare(b));
+
+  const genreOptions = filteredGenres.map((genre, index) => (
+    <option
+      key={index}
+      value={genre}
+      onClick={() => {
+        console.log(genre);
+        selectGenresHandler(genre);
+      }}
+    >
+      {genre}
+    </option> // added value attribute
+  ));
+
+  const selectedGenresList = selectedGenres.map((genre, index) => (
+    <li
+      className={classes.li}
+      key={index}
+      onClick={() => removeGenre(index, setSelectedGenres)}
+    >
+      {genre}
+    </li>
+  ));
+
+  const filteredActors = actors
+    .filter((actor) => actor.toLowerCase().includes(searchActors.toLowerCase()))
+    .sort((a, b) => a.localeCompare(b));
+
+  const slicedActors = filteredActors.slice(0, Math.min(50, actors.length));
+
+  const actorsOptions = slicedActors.map((actor, index) => (
+    <option
+      key={index}
+      value={actor}
+      onClick={() => {
+        console.log(actor);
+        selectActorsHandler(actor);
+      }}
+    >
+      {actor}
+    </option>
+  ));
+
+  const selectedActorsList = selectedActors.map((actor, index) => (
+    <li
+      className={classes.li}
+      key={index}
+      onClick={() => removeActor(index, setSelectedActors)}
+    >
+      {actor}
+    </li>
+  ));
+
+  const selectGenresHandler = (genre) => {
+    console.log(genre);
+    setSelectedGenres((prev) => {
+      return prev.includes(genre) ? prev : [...prev, genre];
+    });
+  };
+
+  const selectActorsHandler = (actor) => {
+    console.log("selectActorsHandler");
+    console.log(actor);
+    setSelectedActors((prev) => {
+      return prev.includes(actor) ? prev : [...prev, actor];
+    });
+  };
+
+  /*const selectGenres = (event, setSelectedGenres) => {
+    const newValue = event.target.value;
+    setSelectedGenres((prev) => {
+      return prev.includes(newValue) ? prev : [...prev, newValue];
+    });
+  };
+
+  const selectActors = (event, setSelectedActors) => {
+    const newValue = event.target.value;
+    setSelectedActors((prev) => {
+      return prev.includes(newValue) ? prev : [...prev, newValue];
+    });
+  };*/
 
   return (
     <form
@@ -24,111 +112,61 @@ const ProfileForm = ({ genres, actors, userId, onCreateProfile }) => {
           selectedGenres,
           selectedActors,
           userId,
-          onCreateProfile
+          onCreateProfile,
+          username
         )
       }
     >
-      <input
-        className={classes.inputText}
+      <LabelInput
+        labelText=""
         type="text"
-        placeholder="Search genres..."
+        id="search_genres"
+        name="search_genres"
         value={searchGenres}
-        onChange={(event) => setSearchGenres(event.target.value)}
-      ></input>
+        placeholder="Search genres..."
+        setter={setSearchGenres}
+      />
 
       <select
         className={classes.inputText}
-        onClick={(event) =>
-          setSelectedGenres((prev) => {
-            const newValue = event.target.value;
-            console.log(newValue);
-            // Check if newValue already exists in selectedGenres array
-            if (!prev.includes(newValue)) {
-              // If it doesn't exist, add it to the array
-              return [...prev, newValue];
-            } else {
-              // If it exists, return the array unchanged
-              return prev;
-            }
-          })
-        }
+        onChange={(event) => selectGenresHandler(event.target.value)}
       >
-        <option disabled>Select genre</option>
-        {genres
-          .filter((genre) =>
-            genre.toLowerCase().includes(searchGenres.toLowerCase())
-          ) // Filter genres based on the search input
-          .map((genre, index) => (
-            <option key={index} value={genre}>
-              {genre}
-            </option> // added value attribute
-          ))}
+        <option disabled selected>
+          Select genre
+        </option>
+        {genreOptions}
       </select>
 
       {selectedGenres.length === 0 ? (
         <p>No selected genres.</p>
       ) : (
-        <ul className={classes.ul}>
-          {selectedGenres.map((genre, index) => (
-            <li
-              className={classes.li}
-              key={index}
-              onClick={() => removeGenre(index, setSelectedGenres)}
-            >
-              {genre}
-            </li>
-          ))}
-        </ul>
+        <ul className={classes.ul}>{selectedGenresList}</ul>
       )}
 
-      <input
-        className={classes.inputText}
+      <LabelInput
+        labelText=""
         type="text"
-        placeholder="Search actors..."
+        id="search_actors"
+        name="search_actors"
         value={searchActors}
-        onChange={(event) => setSearchActors(event.target.value)}
-      ></input>
+        placeholder="Search actors..."
+        setter={setSearchActors}
+      />
 
       <select
         className={classes.select}
-        onChange={(event) =>
-          setSelectedActors((prev) => {
-            const newValue = event.target.value;
-            if (!prev.includes(newValue)) {
-              return [...prev, newValue];
-            } else {
-              return prev;
-            }
-          })
-        }
+        onChange={(event) => selectActorsHandler(event.target.value)}
       >
-        <option disabled>Select actor</option>
-        {actors
-          .filter((actor) =>
-            actor.toLowerCase().includes(searchActors.toLowerCase())
-          )
-          .slice(0, Math.min(50, actors.length))
-          .map((actor, index) => (
-            <option key={index} value={actor}>
-              {actor}
-            </option>
-          ))}
+        <option disabled selected>
+          Select actor
+        </option>
+        {actorsOptions}
       </select>
 
       {selectedActors.length === 0 ? (
-        <p>No selected genres.</p>
+        <p>No selected actors.</p>
       ) : (
-        <ul className={classes.ul}>
-          {selectedActors.map((actor, index) => (
-            <li
-              className={classes.li}
-              key={index}
-              onClick={() => removeActor(index, setSelectedActors)}
-            >
-              {actor}
-            </li>
-          ))}
-        </ul>
+        <ul className={classes.ul}>{selectedActorsList}</ul>
       )}
 
       <button className={classes.button} type="submit">

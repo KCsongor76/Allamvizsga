@@ -1,4 +1,5 @@
-import classes from "../pages/LoginPage.module.css";
+import classes from "./SignUpForm.module.css";
+import LabelInput from "./FormElements/LabelInput";
 
 const SignUpForm = ({
   username,
@@ -19,40 +20,36 @@ const SignUpForm = ({
         onSubmit={(event) => submitHandler(event)}
         className={classes.container}
       >
-        <label className={classes.label}>
-          Username
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-            className={classes.input}
-          />
-        </label>
+        <LabelInput
+          labelText="Username"
+          type="text"
+          id="username"
+          name="username"
+          value={username}
+          setter={setUsername}
+        />
 
-        <label className={classes.label}>
-          Password
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className={classes.input}
-          />
-        </label>
-        <label className={classes.label}>
-          Confirm Password
-          <input
-            type="password"
-            id="password_confirmation"
-            name="password_confirmation"
-            value={passwordConf}
-            onChange={(event) => setPasswordConf(event.target.value)}
-            className={classes.input}
-          />
-        </label>
+        <LabelInput
+          labelText="Password"
+          type="password"
+          id="password"
+          name="password"
+          value={password}
+          setter={setPassword}
+        />
+
+        <LabelInput
+          labelText="Confirm Password"
+          type="password"
+          id="password_confirmation"
+          name="password_confirmation"
+          value={passwordConf}
+          setter={setPasswordConf}
+        />
+
+        <p className={classes.link} onClick={loginHandler}>
+          Already have an account? Log in here!
+        </p>
         <button type="submit" className={classes.button}>
           Sign Up
         </button>
@@ -60,9 +57,6 @@ const SignUpForm = ({
           <p className={classes.errorMessage}>{receivedData.message}</p>
         )}
       </form>
-      <button className={classes.button} onClick={loginHandler}>
-        Log in here
-      </button>
     </>
   );
 };
