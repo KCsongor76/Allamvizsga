@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from backend.recsys.RecSys import RecSys
 from backend.recsys.User import User
+import hashlib
 
 
 def signup_controller():
@@ -15,14 +16,14 @@ def signup_controller():
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'password_confirmation' in request.form:
         username = request.form['username']
         password = request.form['password']
+        # Hash the password
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
         password_confirmation = request.form['password_confirmation']
 
         if username == "":
             return jsonify({"message": "Fill in the username!"}), 401
         try:
             # Fetches database to determine if the given username is unique
-            # user_id = Database.db_process(query=SELECT_USER_ID_BY_USERNAME_SQL, params=(username,))
-            # if user_id is not None:
             if not User.is_unique(username):
                 return jsonify({"message": "This username already exists!"}), 401
             if password == "":
@@ -39,8 +40,7 @@ def signup_controller():
 
             # Inserting user data into database (id, username, password)
             user = User(user_id)
-            print("user")
-            user.insert_user(password=password, username=username)
+            user.insert_user(password=hashed_password, username=username)
 
             actors = RecSys.get_unique_actors()
             genres = RecSys.get_unique_genres()

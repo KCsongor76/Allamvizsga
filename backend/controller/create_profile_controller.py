@@ -20,15 +20,13 @@ def create_profile_controller():
         selected_data = json.loads(request.form['selectedData'])
         selected_genres = selected_data['selectedGenres']
         selected_actors = selected_data['selectedActors']
-        user_id = selected_data['userId']  # TODO: coding convention... (user_id vs userId from React)?
+        user_id = selected_data['userId']
         # Check if genres or actors are selected
         if not selected_actors or not selected_genres:
             return jsonify({"message": "No genres or actors selected"}), 400
 
-        # Format selected genres and actors
-        # TODO:
-        actors = ' '.join([actor.replace(' ', '') for actor in selected_actors])
-        genres = ' '.join([genre.replace(' ', '') for genre in selected_genres])
+        actors = '|'.join(selected_actors)
+        genres = '|'.join(selected_genres)
 
         # Update user profile in the database
         user = User(user_id)

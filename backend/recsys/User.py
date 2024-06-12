@@ -16,7 +16,7 @@ class User:
                             fetchone=False,
                             commit_needed=True)
 
-    def update_user_stats(self, actors: list[str], genres: list[str]) -> None:
+    def update_user_stats(self, actors: str, genres: str) -> None:
         Database.db_process(query=UPDATE_PROFILE_SQL,
                             params=(actors, genres, self.__user_id),
                             fetchone=False,

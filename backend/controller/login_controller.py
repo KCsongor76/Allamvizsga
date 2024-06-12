@@ -1,3 +1,5 @@
+import hashlib
+
 from flask import request, jsonify
 from backend.recsys.RecSys import RecSys
 from backend.recsys.User import User
@@ -17,9 +19,10 @@ def login_controller():
 
         username = request.form['username']
         password = request.form['password']
+        hashed_received_password = hashlib.sha256(password.encode()).hexdigest()
 
         # Attempt to retrieve user ID from the database
-        user_id = User.fetch_user_id(username=username, password=password)
+        user_id = User.fetch_user_id(username=username, password=hashed_received_password)
 
         # If user ID exists, generate movie recommendations for the user
         if user_id is not None:
