@@ -32,7 +32,7 @@ const MovieDetailPage = () => {
   }
 
   return (
-    <div className={classes.container}>
+    <>
       <MovieDataComponent movie={movie} />
 
       {!isNaN(rating) &&
@@ -47,7 +47,7 @@ const MovieDetailPage = () => {
           Go Back
         </button>
       </div>
-    </div>
+    </>
   );
 };
 

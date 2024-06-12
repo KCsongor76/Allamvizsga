@@ -1,8 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import Row from "../components/Row";
 import { UserContext } from "../App";
-import LabelInput from "../components/FormElements/LabelInput";
-import classes from './MainPage.module.css';
+import classes from "./MainPage.module.css";
 
 const MainPage = ({ recommendedMovies }) => {
   const { username, allMovies } = useContext(UserContext);
@@ -25,16 +24,15 @@ const MainPage = ({ recommendedMovies }) => {
       {allMovies.allMovies && (
         <>
           <h2 style={{ color: "white" }}>Search movies:</h2>
-          <div className={classes.labelContainer}>
-            <LabelInput
-              type="text"
-              id="search_movies"
-              name="search_movies"
-              value={searchTitle}
-              setter={setSearchTitle}
-              placeholder="Search title..."
-            />
-          </div>
+          <input
+            className={classes.input}
+            type="text"
+            id="search_movies"
+            name="search_movies"
+            value={searchTitle}
+            onChange={(event) => setSearchTitle(event.target.value)}
+            placeholder="Search title..."
+          />
           <Row
             movies={allMovies.allMovies.filter((movie) =>
               movie.title.toLowerCase().includes(searchTitle.toLowerCase())

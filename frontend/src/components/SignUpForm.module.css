@@ -3,11 +3,24 @@
 .container {
     display: flex;
     flex-direction: column;
-    width: 300px;
+    max-width: 300px;
     margin: 20px auto;
     padding: 20px;
     background-color: #f8f8f8;
-    border-radius: 8px;
+    border-radius: 20px;
+}
+
+.label {
+    margin: 10px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.input {
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
 .button {
@@ -28,7 +41,7 @@
 
 .errorMessage {
     color: red;
-    margin-top: 10px;
+    margin: 15px auto 0 auto;
     font-size: 14px;
 }
 

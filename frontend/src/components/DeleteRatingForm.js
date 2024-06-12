@@ -1,6 +1,8 @@
 import React from "react";
 import { deleteRatingHandler } from "../functions/movieDetailPageFunctions";
 
+/* styling from MovieDetailPage.module.css */
+
 const DeleteRatingForm = ({ movie, userId, setRating }) => {
   return (
     <form

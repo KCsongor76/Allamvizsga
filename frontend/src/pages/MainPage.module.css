@@ -1,5 +1,6 @@
-.labelContainer {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
+.input {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 15px;
 }

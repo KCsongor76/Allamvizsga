@@ -5,7 +5,8 @@ export const profileSubmitHandler = (
   selectedActors,
   userId,
   onCreateProfile,
-  username
+  username,
+  setLoading
 ) => {
   event.preventDefault();
   const form = event.target;
@@ -18,6 +19,7 @@ export const profileSubmitHandler = (
     userId,
   };
 
+  setLoading(true);
   // Append selectedGenres and selectedActors to formData
   formData.append("selectedData", JSON.stringify(selectedData));
 
@@ -28,40 +30,76 @@ export const profileSubmitHandler = (
     .then((response) => response.json())
     .then((data) => {
       console.log({ ...data, username });
+      setLoading(false);
       if (data.message) {
         alert(data.message + "!");
       }
       onCreateProfile({ ...data, username });
     })
-    .catch((error) => console.error("Error:", error));
+    .catch((error) => {
+      setLoading(true);
+      console.error("Error:", error);
+    });
 };
 
-export const removeGenre = (index, setSelectedGenres) => {
-  setSelectedGenres((prevGenres) => {
-    const newGenres = [...prevGenres];
-    newGenres.splice(index, 1); // Remove the genre at the given index
-    return newGenres;
-  });
+export const handleSelectGenre = (
+  genre,
+  selectedGenres,
+  nonSelectedGenres,
+  setNonSelectedGenres,
+  setSelectGenreValue,
+  setSelectedGenres
+) => {
+  if (genre === "") return; // Prevent selecting the default option
+  const updatedNonSelectedGenres = nonSelectedGenres.filter((g) => g !== genre);
+  const updatedSelectedGenres = [...selectedGenres, genre];
+
+  setNonSelectedGenres(updatedNonSelectedGenres.sort());
+  setSelectedGenres(updatedSelectedGenres.sort());
+  setSelectGenreValue(""); // Reset select value to default
 };
 
-export const removeActor = (index, setSelectedActors) => {
-  setSelectedActors((prevActors) => {
-    const newActors = [...prevActors];
-    newActors.splice(index, 1); // Remove the actor at the given index
-    return newActors;
-  });
+export const handleDeselectGenre = (
+  genre,
+  selectedGenres,
+  nonSelectedGenres,
+  setNonSelectedGenres,
+  setSelectedGenres
+) => {
+  const updatedSelectedGenres = selectedGenres.filter((g) => g !== genre);
+  const updatedNonSelectedGenres = [...nonSelectedGenres, genre];
+
+  setSelectedGenres(updatedSelectedGenres.sort());
+  setNonSelectedGenres(updatedNonSelectedGenres.sort());
 };
 
-export const selectGenres = (event, setSelectedGenres) => {
-  const newValue = event.target.value;
-  setSelectedGenres((prev) => {
-    return prev.includes(newValue) ? prev : [...prev, newValue];
-  });
+export const handleSelectActor = (
+  actor,
+  selectedActors,
+  nonSelectedActors,
+  setNonSelectedActors,
+  setSelectedActors,
+  setSelectActorValue
+) => {
+  if (actor === "") return; // Prevent selecting the default option
+  const updatedNonSelectedActors = nonSelectedActors.filter((a) => a !== actor);
+  const updatedSelectedActors = [...selectedActors, actor];
+
+  setNonSelectedActors(updatedNonSelectedActors.sort());
+  setSelectedActors(updatedSelectedActors.sort());
+  setSelectActorValue(""); // Reset select value to default
 };
 
-export const selectActors = (event, setSelectedActors) => {
-  const newValue = event.target.value;
-  setSelectedActors((prev) => {
-    return prev.includes(newValue) ? prev : [...prev, newValue];
-  });
+export const handleDeselectActor = (
+  actor,
+  selectedActors,
+  nonSelectedActors,
+  setNonSelectedActors,
+  setSelectedActors
+) => {
+  const updatedSelectedActors = selectedActors.filter((a) => a !== actor);
+  const updatedNonSelectedActors = [...nonSelectedActors, actor];
+
+  setSelectedActors(updatedSelectedActors.sort());
+  setNonSelectedActors(updatedNonSelectedActors.sort());
 };

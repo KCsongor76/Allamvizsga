@@ -11,16 +11,16 @@ const ProfileDataComponent = ({ userStats }) => {
       {userStats && (
         <>
           <p className={classes.profileText}>
-            Actors: {userStats.actors ? userStats.actors : "None"}
+            Actors: {userStats.actors ? userStats.actors : "N/A"}
           </p>
           <p className={classes.profileText}>
-            Genres: {userStats.genres ? userStats.genres : "None"}
+            Genres: {userStats.genres ? userStats.genres : "N/A"}
           </p>
           <p className={classes.stats}>
             # of rated movies: {userStats.stats ? userStats.stats.count : 0}
           </p>
           <p className={classes.stats}>
-            Your average rating: {userStats.stats ? userStats.stats.avg : "N/A"}
+            Your average rating: {userStats.stats ? Number(userStats.stats.avg).toFixed(2) : "N/A"}
           </p>
         </>
       )}

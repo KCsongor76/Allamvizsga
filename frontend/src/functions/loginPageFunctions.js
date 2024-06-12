@@ -2,10 +2,12 @@ export const submitHandlerLogin = (
   event,
   onAuth,
   setReceivedData,
-  username
+  username,
+  setLoading
 ) => {
   event.preventDefault();
   const form = event.target;
+  setLoading(true);
 
   fetch(form.action, {
     method: "POST",
@@ -13,8 +15,12 @@ export const submitHandlerLogin = (
   })
     .then((response) => response.json())
     .then((data) => {
+      setLoading(false);
       onAuth({ ...data, username });
       setReceivedData(data);
     })
-    .catch((error) => console.error("Error:", error));
+    .catch((error) => {
+      setLoading(false);
+      console.error("Error:", error);
+    });
 };

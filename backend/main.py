@@ -14,9 +14,6 @@ from controller.get_all_movies_controller import get_all_movies_controller
 app = Flask(__name__)
 
 
-# TODO: sql injection, xss, ...,  prevention
-# TODO: password hash
-
 @app.route("/signup", methods=["POST"])
 def signup():
     return signup_controller()

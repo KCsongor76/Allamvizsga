@@ -1,56 +1,94 @@
 /* ProfileForm.module.css */
 
-.formContainer {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    background: #f9f9f9;
-    border-radius: 10px;
+.container {
+  display: flex;
+  flex-direction: column;
+  max-width: 400px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #f8f8f8;
+  border-radius: 20px;
 }
 
 
-.formContainer select {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
+.label {
+  margin: 10px 0;
+  font-size: 14px;
+  color: #333;
 }
 
-.formContainer ul {
-    list-style: none;
-    padding: 0;
+
+.input {
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
-.formContainer li {
-    display: inline-block;
-    background: #007bff;
-    color: #fff;
-    padding: 5px 10px;
-    margin: 5px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: background 0.3s ease;
+.select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
 }
 
-.formContainer li:hover {
-    background: #0056b3;
+.button {
+  width: 100%;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
 }
 
-.formContainer button {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 18px;
-    cursor: pointer;
-    transition: background 0.3s ease;
+.button:hover {
+  background-color: #0056b3;
 }
 
-.formContainer button:hover {
-    background: #0056b3;
+.list {
+  list-style: none;
+  padding: 0;
+}
+
+.listItem {
+  display: inline-block;
+  background: #007bff;
+  color: #fff;
+  padding: 6px 12px;
+  margin: 5px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.listItem:hover {
+  background-color: #0056b3;
+}
+
+.loadingIcon {
+  position: fixed;
+  top: 94%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin-top: -20px;
+  margin-left: -20px;
+  width: 40px;
+  height: 40px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+      transform: rotate(0deg);
+  }
+
+  100% {
+      transform: rotate(360deg);
+  }
 }

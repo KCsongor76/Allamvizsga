@@ -1,109 +1,38 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import classes from "./ProfileForm.module.css";
 import {
+  handleDeselectActor,
+  handleDeselectGenre,
+  handleSelectActor,
+  handleSelectGenre,
   profileSubmitHandler,
-  removeActor,
-  removeGenre,
-  //selectActors,
-  //selectGenres,
 } from "../functions/profileFormFunctions";
 
-import classes from "./ProfileForm.module.css";
-import LabelInput from "./FormElements/LabelInput";
-
 const ProfileForm = ({ genres, actors, userId, onCreateProfile, username }) => {
+  const [nonSelectedGenres, setNonSelectedGenres] = useState(genres.sort());
   const [selectedGenres, setSelectedGenres] = useState([]);
+  const [nonSelectedActors, setNonSelectedActors] = useState(actors.sort());
   const [selectedActors, setSelectedActors] = useState([]);
-  const [searchGenres, setSearchGenres] = useState("");
-  const [searchActors, setSearchActors] = useState("");
+  const [selectGenreValue, setSelectGenreValue] = useState("");
+  const [selectActorValue, setSelectActorValue] = useState("");
+  const [genreSearchTerm, setGenreSearchTerm] = useState("");
+  const [actorSearchTerm, setActorSearchTerm] = useState("");
 
-  const filteredGenres = genres
-    .filter((genre) => genre.toLowerCase().includes(searchGenres.toLowerCase()))
-    .sort((a, b) => a.localeCompare(b));
+  const [loading, setLoading] = useState(false);
 
-  const genreOptions = filteredGenres.map((genre, index) => (
-    <option
-      key={index}
-      value={genre}
-      onClick={() => {
-        console.log(genre);
-        selectGenresHandler(genre);
-      }}
-    >
-      {genre}
-    </option> // added value attribute
-  ));
+  const filteredNonSelectedGenres = nonSelectedGenres.filter((genre) =>
+    genre.toLowerCase().includes(genreSearchTerm.toLowerCase())
+  );
 
-  const selectedGenresList = selectedGenres.map((genre, index) => (
-    <li
-      className={classes.li}
-      key={index}
-      onClick={() => removeGenre(index, setSelectedGenres)}
-    >
-      {genre}
-    </li>
-  ));
-
-  const filteredActors = actors
-    .filter((actor) => actor.toLowerCase().includes(searchActors.toLowerCase()))
-    .sort((a, b) => a.localeCompare(b));
-
-  const slicedActors = filteredActors.slice(0, Math.min(50, actors.length));
-
-  const actorsOptions = slicedActors.map((actor, index) => (
-    <option
-      key={index}
-      value={actor}
-      onClick={() => {
-        console.log(actor);
-        selectActorsHandler(actor);
-      }}
-    >
-      {actor}
-    </option>
-  ));
-
-  const selectedActorsList = selectedActors.map((actor, index) => (
-    <li
-      className={classes.li}
-      key={index}
-      onClick={() => removeActor(index, setSelectedActors)}
-    >
-      {actor}
-    </li>
-  ));
-
-  const selectGenresHandler = (genre) => {
-    console.log(genre);
-    setSelectedGenres((prev) => {
-      return prev.includes(genre) ? prev : [...prev, genre];
-    });
-  };
-
-  const selectActorsHandler = (actor) => {
-    console.log("selectActorsHandler");
-    console.log(actor);
-    setSelectedActors((prev) => {
-      return prev.includes(actor) ? prev : [...prev, actor];
-    });
-  };
-
-  /*const selectGenres = (event, setSelectedGenres) => {
-    const newValue = event.target.value;
-    setSelectedGenres((prev) => {
-      return prev.includes(newValue) ? prev : [...prev, newValue];
-    });
-  };
-
-  const selectActors = (event, setSelectedActors) => {
-    const newValue = event.target.value;
-    setSelectedActors((prev) => {
-      return prev.includes(newValue) ? prev : [...prev, newValue];
-    });
-  };*/
+  const filteredNonSelectedActors = nonSelectedActors
+    .filter((actor) =>
+      actor.toLowerCase().includes(actorSearchTerm.toLowerCase())
+    )
+    .slice(0, 50);
 
   return (
     <form
-      className={classes.formContainer}
+      className={classes.container}
       action="/create_profile"
       method="POST"
       onSubmit={(event) =>
@@ -113,65 +42,141 @@ const ProfileForm = ({ genres, actors, userId, onCreateProfile, username }) => {
           selectedActors,
           userId,
           onCreateProfile,
-          username
+          username,
+          setLoading
         )
       }
     >
-      <LabelInput
-        labelText=""
+      <h2>Select your favourite genres and actors!</h2>
+      <h3>Genres</h3>
+      <label htmlFor="genre-search" className={classes.label}>
+        Search genres:
+      </label>
+
+      <input
+        className={classes.input}
         type="text"
-        id="search_genres"
-        name="search_genres"
-        value={searchGenres}
+        id="genre-search"
+        value={genreSearchTerm}
         placeholder="Search genres..."
-        setter={setSearchGenres}
-      />
-
-      <select
-        className={classes.inputText}
-        onChange={(event) => selectGenresHandler(event.target.value)}
-      >
-        <option disabled selected>
-          Select genre
-        </option>
-        {genreOptions}
-      </select>
-
-      {selectedGenres.length === 0 ? (
-        <p>No selected genres.</p>
-      ) : (
-        <ul className={classes.ul}>{selectedGenresList}</ul>
-      )}
-
-      <LabelInput
-        labelText=""
-        type="text"
-        id="search_actors"
-        name="search_actors"
-        value={searchActors}
-        placeholder="Search actors..."
-        setter={setSearchActors}
+        onChange={(event) => setGenreSearchTerm(event.target.value)}
       />
 
       <select
         className={classes.select}
-        onChange={(event) => selectActorsHandler(event.target.value)}
+        id="genre-select"
+        value={selectGenreValue} // Control the value of select
+        onChange={(event) =>
+          handleSelectGenre(
+            event.target.value,
+            selectedGenres,
+            nonSelectedGenres,
+            setNonSelectedGenres,
+            setSelectGenreValue,
+            setSelectedGenres
+          )
+        }
       >
-        <option disabled selected>
-          Select actor
+        <option value="" disabled>
+          Select a genre
         </option>
-        {actorsOptions}
+        {filteredNonSelectedGenres.map((genre) => (
+          <option key={genre} value={genre}>
+            {genre}
+          </option>
+        ))}
       </select>
 
-      {selectedActors.length === 0 ? (
-        <p>No selected actors.</p>
-      ) : (
-        <ul className={classes.ul}>{selectedActorsList}</ul>
-      )}
+      <ul className={classes.list}>
+        {selectedGenres.length === 0 ? (
+          <p>No selected genres.</p>
+        ) : (
+          selectedGenres.map((genre) => (
+            <li
+              className={classes.listItem}
+              key={genre}
+              onClick={() =>
+                handleDeselectGenre(
+                  genre,
+                  selectedGenres,
+                  nonSelectedGenres,
+                  setNonSelectedGenres,
+                  setSelectedGenres
+                )
+              }
+            >
+              {genre}
+            </li>
+          ))
+        )}
+      </ul>
 
-      <button className={classes.button} type="submit">
-        Create profile!
+      <h3>Actors</h3>
+      <label htmlFor="actor-search" className={classes.label}>
+        Search actors:
+      </label>
+
+      <input
+        className={classes.input}
+        type="text"
+        id="actor-search"
+        value={actorSearchTerm}
+        placeholder="Search actors..."
+        onChange={(event) => setActorSearchTerm(event.target.value)}
+      />
+      <select
+        className={classes.select}
+        id="actor-select"
+        value={selectActorValue} // Control the value of select
+        onChange={(event) =>
+          handleSelectActor(
+            event.target.value,
+            selectedActors,
+            nonSelectedActors,
+            setNonSelectedActors,
+            setSelectedActors,
+            setSelectActorValue
+          )
+        }
+      >
+        <option value="" disabled>
+          Select an actor
+        </option>
+        {filteredNonSelectedActors.map((actor) => (
+          <option key={actor} value={actor}>
+            {actor}
+          </option>
+        ))}
+      </select>
+
+      <ul className={classes.list}>
+        {selectedActors.length === 0 ? (
+          <p>No selected actors.</p>
+        ) : (
+          selectedActors.map((actor) => (
+            <li
+              key={actor}
+              className={classes.listItem}
+              onClick={() =>
+                handleDeselectActor(
+                  actor,
+                  selectedActors,
+                  nonSelectedActors,
+                  setNonSelectedActors,
+                  setSelectedActors
+                )
+              }
+            >
+              {actor}
+            </li>
+          ))
+        )}
+      </ul>
+
+      <button type="submit" className={classes.button}>
+        Submit
       </button>
+      {loading && <div className={classes.loadingIcon} />}
     </form>
   );
 };

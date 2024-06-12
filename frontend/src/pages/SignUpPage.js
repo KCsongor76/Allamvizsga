@@ -1,7 +1,7 @@
 import { useState } from "react";
 import SignUpForm from "../components/SignUpForm";
-import ProfileForm from "../components/ProfileForm";
 import { submitHandlerSignUp } from "../functions/signUpPageFunctions";
+import ProfileForm from "../components/ProfileForm";
 
 const SignUpPage = ({ onSignUp }) => {
   const [username, setUsername] = useState("");

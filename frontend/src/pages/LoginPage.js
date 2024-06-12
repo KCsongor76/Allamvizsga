@@ -1,37 +1,47 @@
 import { useState } from "react";
 import classes from "./LoginPage.module.css";
 import { submitHandlerLogin } from "../functions/loginPageFunctions";
-import LabelInput from "../components/FormElements/LabelInput";
 
 const LoginPage = ({ onAuth, onLogin }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [receivedData, setReceivedData] = useState();
+  const [loading, setLoading] = useState(false);
 
   return (
     <>
       <form
         action="/login"
         method="POST"
-        onSubmit={(event) => submitHandlerLogin(event, onAuth, setReceivedData, username)}
+        onSubmit={(event) =>
+          submitHandlerLogin(
+            event,
+            onAuth,
+            setReceivedData,
+            username,
+            setLoading
+          )
+        }
         className={classes.container}
       >
-        <LabelInput
-          labelText="Username"
+        <label className={classes.label}>Username</label>
+        <input
+          className={classes.input}
           type="text"
           id="username"
           name="username"
           value={username}
-          setter={setUsername}
+          onChange={(event) => setUsername(event.target.value)}
         />
 
-        <LabelInput
-          labelText="Password"
+        <label className={classes.label}>Password</label>
+        <input
+          className={classes.input}
           type="password"
           id="password"
           name="password"
           value={password}
-          setter={setPassword}
+          onChange={(event) => setPassword(event.target.value)}
         />
 
         <p className={classes.link} onClick={() => onLogin(false)}>
@@ -40,9 +50,10 @@ const LoginPage = ({ onAuth, onLogin }) => {
         <button type="submit" className={classes.button}>
           Login
         </button>
-        {receivedData && (
+        {receivedData && !loading && (
           <p className={classes.errorMessage}>{receivedData.message}</p>
         )}
+        {loading && <div className={classes.loadingIcon} />}
       </form>
     </>
   );

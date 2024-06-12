@@ -1,14 +1,26 @@
 /* same as SignUpform.module.css*/
 
-
 .container {
     display: flex;
     flex-direction: column;
-    width: 300px;
+    max-width: 300px;
     margin: 20px auto;
     padding: 20px;
     background-color: #f8f8f8;
-    border-radius: 8px;
+    border-radius: 20px;
+}
+
+.label {
+    margin: 10px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.input {
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
 .button {
@@ -29,13 +41,48 @@
 
 .errorMessage {
     color: red;
-    margin-top: 10px;
+    margin: 15px auto 0 auto;
     font-size: 14px;
 }
 
 .link {
-    margin: 10px auto;
+    margin: 15px auto 10px auto;
     color: #007bff;
     text-decoration: underline;
     cursor: pointer;
+}
+
+/*.loadingIcon {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2em;
+    color: #000;
+  }
+  */
+
+.loadingIcon {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: -25px;
+    margin-left: -25px;
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }

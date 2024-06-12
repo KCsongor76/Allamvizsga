@@ -22,6 +22,7 @@
 /* Add styles for the item container */
 .item_container {
     display: flex;
+    gap: 15px;
 }
 
 /* Add styles for each item */

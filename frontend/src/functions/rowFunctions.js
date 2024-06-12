@@ -5,9 +5,11 @@ export const calculateItemsPerPage = (windowWidth) => {
   const resolution = windowWidth;
 
   // Adjust the logic based on your specific requirements
-  if (resolution < 600) {
+  if (resolution < 450) {
+    return 1;
+  } else if (resolution < 750) {
     return 2;
-  } else if (resolution < 900) {
+  } else if (resolution < 1200) {
     return 4;
   } else {
     return 6;

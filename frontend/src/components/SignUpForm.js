@@ -1,5 +1,4 @@
 import classes from "./SignUpForm.module.css";
-import LabelInput from "./FormElements/LabelInput";
 
 const SignUpForm = ({
   username,
@@ -20,31 +19,34 @@ const SignUpForm = ({
         onSubmit={(event) => submitHandler(event)}
         className={classes.container}
       >
-        <LabelInput
-          labelText="Username"
+        <label className={classes.label}>Username</label>
+        <input
+          className={classes.input}
           type="text"
           id="username"
           name="username"
           value={username}
-          setter={setUsername}
+          onChange={(event) => setUsername(event.target.value)}
         />
 
-        <LabelInput
-          labelText="Password"
+        <label className={classes.label}>Password</label>
+        <input
+          className={classes.input}
           type="password"
           id="password"
           name="password"
           value={password}
-          setter={setPassword}
+          onChange={(event) => setPassword(event.target.value)}
         />
 
-        <LabelInput
-          labelText="Confirm Password"
+        <label className={classes.label}>Confirm Password</label>
+        <input
+          className={classes.input}
           type="password"
           id="password_confirmation"
           name="password_confirmation"
           value={passwordConf}
-          setter={setPasswordConf}
+          onChange={(event) => setPasswordConf(event.target.value)}
         />
 
         <p className={classes.link} onClick={loginHandler}>

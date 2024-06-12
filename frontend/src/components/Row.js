@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import classes from "./Row.module.css";
-import MovieComponent from "./MovieCard";
+import MovieCard from "./MovieCard";
 import {
   calculateItemsPerPage,
   handleNextClick,
@@ -54,7 +54,7 @@ const Row = ({ movies, isProfile }) => {
       <div className={classes.item_container}>
         {movies.length > 0 ? (
           visibleItems.map((item, index) => (
-            <MovieComponent
+            <MovieCard
               key={index}
               item={item}
               index={index}

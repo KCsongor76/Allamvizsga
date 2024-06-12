@@ -23,10 +23,6 @@ function App() {
   const [userId, setUserId] = useState(-1);
   const [username, setUsername] = useState("");
 
-  console.log("username:", username);
-  console.log("userId:", userId);
-  console.log("allMovies:", allMovies);
-
   useEffect(() => {
     fetchAllMovies(setAllMovies);
   }, []);

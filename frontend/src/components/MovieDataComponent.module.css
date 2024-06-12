@@ -10,6 +10,12 @@
     margin-top: 50px;
 }
 
+@media (max-width: 500px) {
+    .movieContainer {
+        flex-direction: column;
+    }
+}
+
 .movieDetails {
     flex: 1;
     padding-right: 20px;

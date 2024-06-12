@@ -1,6 +1,8 @@
 import React from "react";
 import { createUpdateFetch } from "../functions/movieDetailPageFunctions";
 
+/* styling from MovieDetailPage.module.css */
+
 const AddRatingForm = ({ movie, userId, options, setRating }) => {
   return (
     <form

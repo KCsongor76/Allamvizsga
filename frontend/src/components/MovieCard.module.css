@@ -1,18 +1,42 @@
-/* styles.css */
-
 .item {
     border: 1px solid #ccc;
     border-radius: 8px;
     padding: 16px;
-    margin: 8px;
+    margin: 8px auto;
     cursor: pointer;
     transition: transform 0.3s ease-in-out;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     background-color: #fff;
-    max-width: 200px;
+    /*max-width: 200px;*/
 }
 
-.item:hover{
+@media (max-width: 450px) {
+    .item {
+        width: 70%;
+    }
+}
+
+@media (min-width: 451px) and (max-width: 750px) {
+    .item {
+        width: 40%;
+    }
+}
+
+@media (min-width: 751px) and (max-width: 1200px) {
+    .item {
+        width: 20%;
+    }
+}
+
+@media (min-width: 1201px) {
+    .item {
+        width: 15%;
+    }
+}
+
+
+
+.item:hover {
     transform: scale(1.05);
 }
 
