@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from backend.recsys.Movie import Movie
+from model.recsys.Movie import Movie
 
 
 def get_rating_by_ids_controller():

@@ -1,6 +1,6 @@
 from flask import request, jsonify
-from backend.recsys.Movie import Movie
-from backend.recsys.User import User
+from model.recsys.Movie import Movie
+from model.recsys.User import User
 
 
 def get_user_stats_controller():

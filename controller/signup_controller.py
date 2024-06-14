@@ -1,6 +1,6 @@
 from flask import request, jsonify
-from backend.recsys.RecSys import RecSys
-from backend.recsys.User import User
+from model.recsys.RecSys import RecSys
+from model.recsys.User import User
 import hashlib
 
 

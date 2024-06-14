@@ -1,10 +1,10 @@
 from flask import request, jsonify
-from backend.recsys.Movie import Movie
+from model.recsys.Movie import Movie
 
 
-def add_rating_controller():
+def update_rating_controller():
     """
-    Adds rating to selected movie by selected user.
+    Updates selected movie's rating for the selected user.
     :return:
     """
     try:
@@ -17,9 +17,9 @@ def add_rating_controller():
         rating = float(request.form["rating"])
 
         movie = Movie(movie_id)
-        movie.add_rating(user_id=user_id, rating=rating)
+        movie.update_rating(user_id=user_id, rating=rating)
 
-        return jsonify({"message": "Rating added successfully"}), 200
+        return jsonify({"message": "Rating updated successfully"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

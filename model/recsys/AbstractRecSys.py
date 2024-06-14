@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import pandas as pd
 
-from backend.database.Database.Database import Database
+from model.database.Database.Database import Database
 
 
 class AbstractRecSys(ABC):

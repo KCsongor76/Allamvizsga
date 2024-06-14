@@ -2,8 +2,8 @@ import datetime
 
 import pandas as pd
 
-from backend.database.Database.Database import Database
-from backend.database.mysql_constants import SELECT_MOVIE_BY_ID_SQL, INSERT_INTO_RATINGS_SQL, UPDATE_RATINGS_SQL, \
+from model.database.Database.Database import Database
+from model.database.mysql_constants import SELECT_MOVIE_BY_ID_SQL, INSERT_INTO_RATINGS_SQL, UPDATE_RATINGS_SQL, \
     SELECT_RATED_MOVIES_BY_USER_ID_SQL, SELECT_RATING_MOVIE_USER_ID_SQL, DELETE_RATING_SQL
 
 

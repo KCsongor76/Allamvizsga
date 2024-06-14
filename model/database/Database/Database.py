@@ -1,7 +1,7 @@
 import mysql.connector
 import pandas as pd
-from backend.database.Database.AbstractDatabase import AbstractDatabase
-from backend.database.mysql_constants import HOST, DBNAME, USERNAME, PASSWORD
+from model.database.Database.AbstractDatabase import AbstractDatabase
+from model.database.mysql_constants import HOST, DBNAME, USERNAME, PASSWORD
 
 
 class Database(AbstractDatabase):
@@ -83,4 +83,3 @@ class Database(AbstractDatabase):
             cls.close_connection()
 
         return data
-

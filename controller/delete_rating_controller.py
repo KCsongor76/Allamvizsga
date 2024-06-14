@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from backend.recsys.Movie import Movie
+from model.recsys.Movie import Movie
 
 
 def delete_rating_controller():

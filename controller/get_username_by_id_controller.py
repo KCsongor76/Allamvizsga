@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from backend.recsys.User import User
+from model.recsys.User import User
 
 
 def get_username_by_id_controller():

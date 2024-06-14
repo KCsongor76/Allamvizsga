@@ -8,13 +8,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from surprise import Reader, Dataset, SVD, KNNBaseline
 from surprise.model_selection import cross_validate
-from backend.database.Database.Database import Database
-from backend.database.mysql_constants import SELECT_RATINGS_SQL, SELECT_MOST_POPULAR_RECOMMENDATIONS_SQL
-from backend.recsys.AbstractRecSys import AbstractRecSys
+from model.database.Database.Database import Database
+from model.database.mysql_constants import SELECT_RATINGS_SQL, SELECT_MOST_POPULAR_RECOMMENDATIONS_SQL
+from model.recsys.AbstractRecSys import AbstractRecSys
 from pathlib import Path
 
-from backend.recsys.Movie import Movie
-from backend.recsys.User import User
+from model.recsys.Movie import Movie
+from model.recsys.User import User
 
 
 class RecSys(AbstractRecSys):

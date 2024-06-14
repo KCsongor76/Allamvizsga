@@ -1,7 +1,7 @@
 from flask import jsonify
 
-from backend.database.Database.Database import Database
-from backend.recsys.Movie import Movie
+from model.database.Database.Database import Database
+from model.recsys.Movie import Movie
 
 
 def get_all_movies_controller():
