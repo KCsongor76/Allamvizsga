@@ -18,7 +18,6 @@ def get_rating_by_ids_controller():
         movie = Movie(movie_id)
         rating = movie.get_rating(user_id)
 
-        # if isinstance(rating, (float, int)):
         if rating is not None:
             return jsonify({"type": "get_rating_by_ids", "rating": rating}), 200
         return jsonify({"type": "get_rating_by_ids", "message": "No rating yet"}), 200

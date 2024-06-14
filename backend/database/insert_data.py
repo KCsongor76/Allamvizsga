@@ -1,4 +1,6 @@
 import csv
+import hashlib
+
 import mysql.connector
 from faker import Faker
 from datetime import datetime
@@ -20,19 +22,36 @@ def connect_to_db():
 def insert_users():
     connection = connect_to_db()
     faker = Faker()
-
     num_records = 610
-
     cursor = connection.cursor()
-    for i in range(1, num_records + 1):
+    username1 = "user1"
+    password1 = "user1"
+    hashed_password1 = hashlib.sha256(password1.encode()).hexdigest()
+    cursor.execute(INSERT_INTO_USERS_SQL, (1, username1, hashed_password1))
+    username2 = "user2"
+    password2 = "user2"
+    hashed_password2 = hashlib.sha256(password2.encode()).hexdigest()
+    cursor.execute(INSERT_INTO_USERS_SQL, (2, username2, hashed_password2))
+
+    for i in range(3, num_records + 1):
         username = faker.user_name()
         password = faker.password()
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
         # Insert fake data into the users table
-        cursor.execute(INSERT_INTO_USERS_SQL, (i, username, password))
+        cursor.execute(INSERT_INTO_USERS_SQL, (i, username, hashed_password))
 
     connection.commit()
     connection.close()
     print("Users inserted.")
+
+
+def decode_string(value):
+    try:
+        # Attempt to decode using 'latin1' and then re-encode to 'utf-8'
+        return value.encode('latin1').decode('utf-8')
+    except UnicodeEncodeError:
+        # If an error occurs, return the original value
+        return value
 
 
 def process_csv(csv_file, query, type):
@@ -42,15 +61,29 @@ def process_csv(csv_file, query, type):
         reader = csv.DictReader(file)
         cursor = connection.cursor()
         for row in reader:
-            # print(row)
+            # Decode the strings that might have encoding issues
             if type == "movies":
-                params = (int(row['id']), row['title'], row['genre'], row['year'], row['director'], row['actors'],
-                          row['plot'], row['poster'], row['imdb_votes'], row['imdb_rating'])
+                params = (
+                    int(row['id']),
+                    decode_string(row['title']),
+                    decode_string(row['genre']),
+                    row['year'],
+                    decode_string(row['director']),
+                    decode_string(row['actors']),
+                    decode_string(row['plot']),
+                    row['poster'],
+                    row['imdb_votes'],
+                    row['imdb_rating']
+                )
             elif type == "links":
                 params = (int(row['movieId']), row['imdbId'], row['tmdbId'])
             elif type == "ratings":
-                params = (int(row['userId']), int(row['movieId']), float(row['rating']),
-                          datetime.fromtimestamp(int(row['timestamp'])))
+                params = (
+                    int(row['userId']),
+                    int(row['movieId']),
+                    float(row['rating']),
+                    datetime.fromtimestamp(int(row['timestamp']))
+                )
 
             cursor.execute(query, params)
 

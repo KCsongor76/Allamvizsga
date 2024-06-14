@@ -14,7 +14,7 @@ combined_features = np.array(movies['combined_features'])
 
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
-path = 'SBERT_data/embeddings_g_a.pkl'
+path = 'embeddings_g_a.pkl'
 
 # Check if the path exists
 if os.path.exists(path):
@@ -32,15 +32,15 @@ else:
     os.makedirs('SBERT_data', exist_ok=True)
 
     # Save embeddings to a file using pickle
-    with open('SBERT_data/embeddings_g_a.pkl', 'wb') as f:
+    with open('embeddings_g_a.pkl', 'wb') as f:
         pickle.dump(combined_embeddings, f)
 
     # Save similarity_sbert to a file using pickle
-    with open('SBERT_data/similarity_sbert_g_a.pkl', 'wb') as f:
+    with open('similarity_sbert_g_a.pkl', 'wb') as f:
         pickle.dump(similarity_sbert_combined, f)
 
     # Save cos_sim_data to a file using pickle
-    with open('SBERT_data/cos_sim_data_g_a.pkl', 'wb') as f:
+    with open('cos_sim_data_g_a.pkl', 'wb') as f:
         pickle.dump(cos_sim_data_combined, f)
 
 

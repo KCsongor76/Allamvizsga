@@ -1,6 +1,12 @@
+from typing import List
+
+import pandas as pd
+
 from backend.database.Database.Database import Database
 from backend.database.mysql_constants import SELECT_STATS_BY_USER_ID, SELECT_PROFILE_DATA_BY_USER_ID_SQL, \
-    INSERT_INTO_USERS_SQL, SELECT_USER_ID_BY_USERNAME_SQL, SELECT_MAX_USER_ID_SQL, LOGIN_SQL, UPDATE_PROFILE_SQL
+    INSERT_INTO_USERS_SQL, SELECT_USER_ID_BY_USERNAME_SQL, SELECT_MAX_USER_ID_SQL, LOGIN_SQL, UPDATE_PROFILE_SQL, \
+    SELECT_RATED_MOVIES_BY_USER_ID_SQL
+from backend.recsys.Movie import Movie
 
 
 class User:
