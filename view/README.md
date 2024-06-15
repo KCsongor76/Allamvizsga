@@ -1,10 +1,3 @@
-Backend server start: navigate to the rec_sys_react/PHP directory
-### `php -S localhost:8000`
-
-Frontend server start: directory: rec_sys_react
-### `npm install` and/or `npm start`
-
-
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
