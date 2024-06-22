@@ -21,17 +21,10 @@ CREATE_TABLES_SQL = """
         year VARCHAR(255) NOT NULL,
         director VARCHAR(255) NOT NULL,
         actors VARCHAR(255) NOT NULL,
-        plot VARCHAR(255) NOT NULL,
+        plot TEXT NOT NULL,
         poster VARCHAR(255) NOT NULL,
         imdb_votes VARCHAR(255) NOT NULL,
         imdb_rating VARCHAR(255) NOT NULL
-    );
-    CREATE TABLE links (
-        movieId INT(11),
-        imdbId VARCHAR(11),
-        tmdbId VARCHAR(11),
-        PRIMARY KEY (movieId),
-        FOREIGN KEY (movieId) REFERENCES movies(movieId)
     );
     CREATE TABLE ratings (
         userId INT(11),
@@ -45,7 +38,6 @@ CREATE_TABLES_SQL = """
 """
 INSERT_INTO_USERS_SQL = "INSERT INTO users (userId, username, password) VALUES (%s, %s, %s)"
 INSERT_INTO_MOVIES_SQL = "INSERT INTO movies (movieId, title, genre, year, director, actors, plot, poster, imdb_votes, imdb_rating) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-INSERT_INTO_LINKS_SQL = "INSERT INTO links (movieId, imdbId, tmdbId) VALUES (%s, %s, %s)"
 INSERT_INTO_RATINGS_SQL = "INSERT INTO ratings (userId, movieId, rating, timestamp) VALUES (%s, %s, %s, %s)"
 
 SELECT_MOVIE_BY_ID_SQL = "SELECT movieId, title, genre, year, director, actors, plot, poster, imdb_votes, imdb_rating FROM movies WHERE movieId = %s"
@@ -64,3 +56,5 @@ UPDATE_PROFILE_SQL = "UPDATE users SET actors_profile = %s, genres_profile = %s 
 UPDATE_RATINGS_SQL = "UPDATE ratings SET rating = %s, timestamp = %s WHERE userId = %s AND movieId = %s"
 
 DELETE_RATING_SQL = "DELETE FROM ratings WHERE userId = %s AND movieId = %s"
+DELETE_DUPE_RATINGS_SQL = "DELETE FROM ratings WHERE movieId IN (2851, 4051, 4241, 5264, 5672, 6003, 6776, 32600, 66511, 79677, 95771, 107780, 127194, 174551, 183197, 183227);"
+DELETE_DUPE_MOVIES_SQL = "DELETE FROM movies WHERE title = '#DUPE#'"

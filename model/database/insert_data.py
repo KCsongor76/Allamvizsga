@@ -4,8 +4,10 @@ import hashlib
 import mysql.connector
 from faker import Faker
 from datetime import datetime
+
+from model.database.Database.Database import Database
 from mysql_constants import HOST, DBNAME, USERNAME, PASSWORD, INSERT_INTO_USERS_SQL, INSERT_INTO_MOVIES_SQL, \
-    INSERT_INTO_LINKS_SQL, INSERT_INTO_RATINGS_SQL
+    INSERT_INTO_RATINGS_SQL, DELETE_DUPE_RATINGS_SQL, DELETE_DUPE_MOVIES_SQL
 
 
 def connect_to_db():
@@ -75,8 +77,6 @@ def process_csv(csv_file, query, type):
                     row['imdb_votes'],
                     row['imdb_rating']
                 )
-            elif type == "links":
-                params = (int(row['movieId']), row['imdbId'], row['tmdbId'])
             elif type == "ratings":
                 params = (
                     int(row['userId']),
@@ -94,14 +94,16 @@ def process_csv(csv_file, query, type):
 
 if __name__ == "__main__":
     movies_path = "csvdata/movies_metadata.csv"
-    links_path = "csvdata/links.csv"
     ratings_path = "csvdata/ratings.csv"
 
     movies_query = INSERT_INTO_MOVIES_SQL
-    links_query = INSERT_INTO_LINKS_SQL
     ratings_query = INSERT_INTO_RATINGS_SQL
 
     insert_users()
     process_csv(movies_path, movies_query, "movies")
-    process_csv(links_path, links_query, "links")
     process_csv(ratings_path, ratings_query, "ratings")
+
+    Database.db_process(DELETE_DUPE_RATINGS_SQL, commit_needed=True)
+    Database.db_process(DELETE_DUPE_MOVIES_SQL, commit_needed=True)
+
+    print("Done!")

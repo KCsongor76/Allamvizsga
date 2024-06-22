@@ -273,7 +273,7 @@ class RecSys(AbstractRecSys):
         # jupyter notebook - grid_search_with_figs
         svd_params = {'n_factors': 160, 'n_epochs': 100, 'lr_all': 0.008, 'reg_all': 0.1}
         collaborative_movies = cls.collaborative_filter_recommender(algo_class=SVD, params=svd_params,
-                                                                    user_id=user_id, top_n=10)
+                                                                    user_id=user_id, top_n=6)
         rated_movies = Movie.get_rated_movies_by_user_id(user_id)
         has_profile = actors is not None and genres is not None
         rated_movies += collaborative_movies
@@ -298,10 +298,6 @@ class RecSys(AbstractRecSys):
         count, avg = user.get_user_stats()
         actors, genres = user.get_user_profile()
 
-        print(f"count: {count}")
-        print(f"actors: {actors}, type: {type(actors)}")
-        print(f"genres: {genres}, type: {type(genres)}")
-        # TODO: colliding movies check
         if count in range(0, 26):
             recommended_movies = cls.cold_start_user_recommendation(user_id=user_id, actors=actors, genres=genres,
                                                                     top_n=top_n)
