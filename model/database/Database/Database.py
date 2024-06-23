@@ -28,9 +28,6 @@ class Database(AbstractDatabase):
     def close_connection(cls) -> None:
         try:
             if cls._connection is not None and cls._connection.is_connected():
-                # Consume any unread results
-                # while cls._connection.next_result():
-                #     pass
                 cls._connection.close()
         except Exception as e:
             print("Error closing connection:", e)
@@ -40,7 +37,6 @@ class Database(AbstractDatabase):
 
     @classmethod
     def read_mysql_to_dataframe(cls, query: str) -> pd.DataFrame:
-        # TODO: db_process
         try:
             cursor = cls.get_connection().cursor()
             cursor.execute(query)

@@ -11,7 +11,6 @@ export const navigateHandler = (
     userId: userId,
     movieId: item.id,
   };
-  // Send a POST request to the Flask backend
   fetch("/get_rating_by_ids", {
     method: "POST",
     headers: {
@@ -31,8 +30,6 @@ export const navigateHandler = (
       if (data.rating) {
         navigate(`/${index}`, {
           state: {
-            //username: username,
-            //userId: userId,
             movie: item,
             rating: data.rating, // Use the updated rating here
             isProfile: isProfile,
@@ -42,8 +39,6 @@ export const navigateHandler = (
         // If there's no rating data, navigate without updating rating
         navigate(`${index}`, {
           state: {
-            //username: username,
-            //userId: userId,
             movie: item,
             isProfile: isProfile,
           },

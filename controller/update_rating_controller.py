@@ -12,10 +12,12 @@ def update_rating_controller():
         if "userId" not in request.form or "movieId" not in request.form or "rating" not in request.form:
             return jsonify({"error": "Missing 'userId', 'movieId', or 'rating' in form data."}), 400
 
+        # extract form data
         movie_id = int(request.form["movieId"])
         user_id = int(request.form["userId"])
         rating = float(request.form["rating"])
 
+        # update movie rating
         movie = Movie(movie_id)
         movie.update_rating(user_id=user_id, rating=rating)
 

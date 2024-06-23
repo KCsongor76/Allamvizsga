@@ -18,7 +18,6 @@ export const getUsernameById = (userId, setUsername) => {
       return response.json();
     })
     .then((data) => {
-      console.log("getUsernameById exec");
       setUsername(data.username);
     })
     .catch((error) => {

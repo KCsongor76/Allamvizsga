@@ -3,7 +3,6 @@ import pickle
 import random
 import numpy as np
 import pandas as pd
-from nltk.corpus import stopwords
 from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -20,50 +19,20 @@ from model.recsys.User import User
 
 class RecSys(AbstractRecSys):
 
-    # @classmethod
-    # def tfidf_recommender(cls, all_movies, genres, actors, movie_name="Star Wars: Episode III - Revenge of the Sith",
-    #                       top_n=5):
-    #     print(f"genres: {genres}, type: {type(genres)}")
-    #     print(f"actors: {actors}, type: {type(actors)}")
-    #     print()
-    #     print(f"all_movies[tags]: {all_movies['genre'][0]}, type: {type(all_movies['genre'][0])}")
-    #     print(f"all_movies[tags]: {all_movies['actors'][0]}, type: {type(all_movies['actors'][0])}")
-    #     # TF-IDF Vectorization
-    #     tfidf = TfidfVectorizer(max_features=5000, stop_words='english')
-    #     all_movies['tags'] = all_movies['genre'] + ' ' + all_movies['actors']
-    #     vectorized_data = tfidf.fit_transform(all_movies['tags'])
-    #     # Calculate cosine similarity directly on TF-IDF vectors
-    #     similarity = cosine_similarity(vectorized_data)
-    #
-    #     movie_index = all_movies[all_movies.title == movie_name].index.values[0]
-    #     sim_scores_all = sorted(list(enumerate(similarity[movie_index])), key=lambda x: x[1], reverse=True)
-    #
-    #     if top_n > 0:
-    #         sim_scores_all = sim_scores_all[1:top_n + 1]
-    #
-    #     # get the movie indices of the top similar movies
-    #     movie_indices = [i[0] for i in sim_scores_all]
-    #     scores = [i[1] for i in sim_scores_all]
-    #
-    #     # return the top n most similar movies from the movies df
-    #     top_titles_df = pd.DataFrame(all_movies.iloc[movie_indices]['title'])
-    #     top_titles_df['sim_scores'] = scores
-    #     top_titles_df['ranking'] = range(1, len(top_titles_df) + 1)
-    #
-    #     recommended_movies = []
-    #     for title in top_titles_df['title']:
-    #         movie = Database.db_process(query="SELECT * FROM movies WHERE title = %s", params=(title,), fetchone=True)
-    #         recommended_movies.append(Movie.movie_to_dict(movie))
-    #     return recommended_movies
-
     @classmethod
     def tfidf_recommender(cls, all_movies, genres, actors, top_n=5):
-        # Print input details for debugging
-        print(f"genres: {genres}, type: {type(genres)}")
-        print(f"actors: {actors}, type: {type(actors)}")
-        print()
-        print(f"all_movies[genre]: {all_movies['genre'][0]}, type: {type(all_movies['genre'][0])}")
-        print(f"all_movies[actors]: {all_movies['actors'][0]}, type: {type(all_movies['actors'][0])}")
+        """
+        Perform TF-IDF vectorization on movie tags based on genres and actors to recommend top similar movies.
+
+        Parameters:
+            all_movies (DataFrame): DataFrame containing movie information.
+            genres (str): Pipe-separated string of genres.
+            actors (str): Pipe-separated string of actors.
+            top_n (int): Number of top recommendations to return.
+
+        Returns:
+            list: List of dictionaries representing the recommended movies.
+        """
 
         # Ensure genres are formatted correctly
         genres = genres.replace('|', ' ')
@@ -73,10 +42,7 @@ class RecSys(AbstractRecSys):
 
         # Combine genres and actors into a single string
         input_tags = f"{genres} {actors}"
-        print(f"input_tags: {input_tags}")
-        all_movies['tags'] = all_movies['genre'] + ' ' + all_movies[
-            'actors']  # .str.replace(' ', '').str.replace('|', ' ')
-        print(f"all_movies[tags][0]: {all_movies['tags'][0]}")
+        all_movies['tags'] = all_movies['genre'] + ' ' + all_movies['actors']
 
         # TF-IDF Vectorization
         tfidf = TfidfVectorizer(max_features=5000, stop_words='english')
@@ -112,6 +78,19 @@ class RecSys(AbstractRecSys):
 
     @staticmethod
     def handle_dumping_loading(model, combined_features):
+        """
+        A function that handles the dumping and loading of embeddings.
+        It checks if a file path exists, loads the embeddings if it does,
+        and encodes the combined features using the model if the file path does not exist.
+
+        Parameters:
+            model: The model used for encoding.
+            combined_features: The combined features to be encoded.
+
+        Returns:
+            The combined embeddings after loading or encoding.
+        """
+
         current_path = Path(__file__).parent.resolve()
         sbert_path = current_path / 'SBERT_data'
         file_path = sbert_path / 'embeddings_g_a.pkl'
@@ -129,6 +108,19 @@ class RecSys(AbstractRecSys):
 
     @classmethod
     def sbert_recommender(cls, user_id: int, top_n: int = 10, generated_movies: list[dict] = None) -> list[dict]:
+        """
+        Recommends top similar movies using SBERT embeddings for a given user.
+
+        Args:
+            user_id (int): The ID of the user for whom recommendations are generated.
+            top_n (int, optional): Number of top recommendations to return. Defaults to 10.
+            generated_movies (list[dict], optional): Movies to not include in recommendations.
+            Defaults to None.
+
+        Returns:
+            list[dict]: List of dictionaries representing the recommended movies.
+        """
+
         movies = Movie.get_movies_from_mysql()
         rated_movies = Movie.get_rated_movies_by_user_id(user_id=user_id)
         # rated_movie_ids = [movie['id'] for movie in rated_movies]
@@ -156,6 +148,16 @@ class RecSys(AbstractRecSys):
         indices = pd.Series(movies.index, index=movies['id'])
 
         def get_sbert_recommendations(movie_id: int) -> pd.DataFrame:
+            """
+            Get SBERT recommendations for a given movie ID.
+
+            Parameters:
+                movie_id (int): The ID of the movie for which recommendations are generated.
+
+            Returns:
+                pd.DataFrame: DataFrame containing recommended movies and their similarity scores.
+            """
+
             idx = indices[movie_id]
 
             sim_scores = list(enumerate(cos_sim_data[idx]))
@@ -178,7 +180,6 @@ class RecSys(AbstractRecSys):
 
         combined_recommendations = combined_recommendations.drop_duplicates(subset='id')
         combined_recommendations = combined_recommendations.sort_values(by='similarity_score', ascending=False)
-        print(f"rec_movies_df: {combined_recommendations}")
         recommended_movies = []
         for movieId in combined_recommendations['id'].tolist():
             if movieId not in all_rated_movie_ids:
@@ -189,12 +190,25 @@ class RecSys(AbstractRecSys):
 
     @classmethod
     def collaborative_filter_recommender(cls, algo_class, params, user_id: int, top_n: int = 10) -> list[dict]:
+        """
+        A collaborative filtering recommender function that uses the provided algorithm class
+        and parameters to recommend movies to a user.
+
+        Parameters:
+            algo_class: The class of the collaborative filtering algorithm to be used.
+            params: Parameters for the collaborative filtering algorithm.
+            user_id (int): The ID of the user for whom recommendations are generated.
+            top_n (int, optional): Number of top recommendations to return. Defaults to 10.
+
+        Returns:
+            list[dict]: List of dictionaries representing the recommended movies.
+        """
+
         print("collaborative")
         np.random.seed(0)
         random.seed(0)
 
         ratings_df = Database.read_mysql_to_dataframe(query=SELECT_RATINGS_SQL)
-        print(f"ratings_df: {ratings_df}")
         reader = Reader(rating_scale=(1, 5))
         data = Dataset.load_from_df(ratings_df[['userId', 'movieId', 'rating']], reader)
 
@@ -205,10 +219,9 @@ class RecSys(AbstractRecSys):
 
         # Get the list of all movie IDs in the trainset
         movie_internal_ids = list(trainset.all_items())
-        movie_ids = [trainset.to_raw_iid(internal_id) for internal_id in movie_internal_ids]
-        print(f"movie_ids: {movie_ids}")
 
         # Get the list of rated movies for the user
+        rated_internal_movies = []
         try:
             user_internal_id = trainset.to_inner_uid(user_id)
             rated_internal_movies = [rating[0] for rating in trainset.ur[user_internal_id]]
@@ -217,8 +230,6 @@ class RecSys(AbstractRecSys):
             # If the user_id is not in the trainset, handle accordingly
             rated_movies = []
 
-        print(f"rated_movies: {rated_movies}")
-
         # Get the list of unrated movies for the user
         unrated_internal_movies = [internal_id for internal_id in movie_internal_ids if
                                    internal_id not in rated_internal_movies]
@@ -226,10 +237,8 @@ class RecSys(AbstractRecSys):
                        unrated_internal_movies]
         predictions.sort(key=lambda x: x.est, reverse=True)
         top_movies = predictions[:top_n]
-        print(f"top_movies: {top_movies}")
 
         ids = [movie.iid for movie in top_movies]
-        print(f"ids: {ids}")
 
         # Verify that no rated movies are included in the final recommendation
         ids = [movie_id for movie_id in ids if movie_id not in rated_movies]
@@ -240,6 +249,19 @@ class RecSys(AbstractRecSys):
     @classmethod
     def cold_start_user_recommendation(cls, user_id: int, actors: str = None,
                                        genres: str = None, top_n: int = 10) -> list[dict]:
+        """
+        Perform cold start user recommendation based on user's profile information or popular movies.
+
+        Parameters:
+            user_id (int): The ID of the user for whom recommendations are generated.
+            actors (str, optional): Pipe-separated string of actors in the user's profile. Defaults to None.
+            genres (str, optional): Pipe-separated string of genres in the user's profile. Defaults to None.
+            top_n (int, optional): Number of top recommendations to return. Defaults to 10.
+
+        Returns:
+            list[dict]: List of dictionaries representing the recommended movies.
+        """
+
         print("coldstart")
         has_profile = actors is not None and genres is not None
         rated_movies = Movie.get_rated_movies_by_user_id(user_id)
@@ -276,8 +298,6 @@ class RecSys(AbstractRecSys):
             print(f"first moviedata: {all_movies['actors']}")
             if len(threshold_ok_movies) == 0:
                 print("popular + tf-idf")
-                # tf_ifd_movies = cls.tfidf_recommender(user_id=user_id, movies=all_movies, genres=genres, actors=actors,
-                #                                       top_n=5)
                 tf_idf_movies = cls.tfidf_recommender(all_movies=all_movies, genres=genres, actors=actors, top_n=5)
                 recommended_movies = list(tf_idf_movies) + list(popular_movies_dict)[:5]
                 return recommended_movies
@@ -290,8 +310,20 @@ class RecSys(AbstractRecSys):
 
     @classmethod
     def moderately_active_user_recommendation(cls, user_id: int,
-                                              actors: None | list[str] = None,
-                                              genres: None | list[str] = None) -> list[dict]:
+                                              actors: None | str = None,
+                                              genres: None | str = None) -> list[dict]:
+        """
+        Perform moderately active user recommendation based on collaborative filtering with optional actors and genres.
+
+        Parameters:
+            user_id (int): The ID of the user for whom recommendations are generated.
+            actors (None | list[str], optional): List of actors the user is interested in. Defaults to None.
+            genres (None | list[str], optional): List of genres the user prefers. Defaults to None.
+
+        Returns:
+            list[dict]: List of dictionaries representing the recommended movies for the moderately active user.
+        """
+
         print("moderately")
         # jupyter notebook - grid_search_with_figs
         knn_user_params = {'k': 40, 'sim_options': {'name': 'msd', 'min_support': 3, 'user_based': True},
@@ -310,7 +342,6 @@ class RecSys(AbstractRecSys):
             print("KNN + TFIDF + SBERT")
             all_movies = Movie.get_movies_from_mysql()
             tf_idf_movies = cls.tfidf_recommender(all_movies=all_movies, genres=genres, actors=actors, top_n=2)
-            # TODO: TF-IDF - already rated movies
             sbert_movies = cls.sbert_recommender(user_id=user_id, generated_movies=rated_movies, top_n=2)
             recommended_movies = list(sbert_movies) + list(tf_idf_movies) + list(collaborative_movies)
 
@@ -318,8 +349,20 @@ class RecSys(AbstractRecSys):
 
     @classmethod
     def highly_active_user_recommendation(cls, user_id: int,
-                                          actors: None | list[str] = None,
-                                          genres: None | list[str] = None) -> list[dict]:
+                                          actors: None | str = None,
+                                          genres: None | str = None) -> list[dict]:
+        """
+        Recommends movies for highly active users based on collaborative filtering and content-based techniques.
+
+        Parameters:
+            user_id (int): The ID of the user for whom recommendations are generated.
+            actors (None, list[str], optional): List of actors the user likes. Defaults to None.
+            genres (None, list[str], optional): List of genres the user prefers. Defaults to None.
+
+        Returns:
+            list[dict]: List of dictionaries representing the recommended movies for the user.
+        """
+
         print("highly")
         # jupyter notebook - grid_search_with_figs
         svd_params = {'n_factors': 160, 'n_epochs': 100, 'lr_all': 0.008, 'reg_all': 0.1}
@@ -336,7 +379,6 @@ class RecSys(AbstractRecSys):
             print("SVD + TFIDF + SBERT")
             all_movies = Movie.get_movies_from_mysql()
             tf_idf_movies = cls.tfidf_recommender(all_movies=all_movies, genres=genres, actors=actors, top_n=2)
-            # TODO: TF-IDF - already rated movies
             sbert_movies = cls.sbert_recommender(user_id=user_id, generated_movies=rated_movies, top_n=2)
             recommended_movies = list(sbert_movies) + list(tf_idf_movies) + list(collaborative_movies)
 
@@ -344,6 +386,17 @@ class RecSys(AbstractRecSys):
 
     @classmethod
     def generate_recommendation(cls, user_id: int, top_n: int = 10) -> list[dict]:
+        """
+        Generate recommendations for a user based on their user stats, profile, and activity level.
+
+        Parameters:
+            user_id (int): The ID of the user for whom recommendations are generated.
+            top_n (int, optional): Number of top recommendations to return. Defaults to 10.
+
+        Returns:
+            list[dict]: List of dictionaries representing the recommended movies for the user.
+        """
+
         user = User(user_id)
         count, avg = user.get_user_stats()
         actors, genres = user.get_user_profile()

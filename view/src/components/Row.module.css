@@ -13,7 +13,7 @@
 .navigation_buttons button {
     width: 30px;
     height: 30px;
-    margin-right: 10px;
+    margin: 5px;
     background-color: #f2f2f2;
     border: none;
     border-radius: 5px;

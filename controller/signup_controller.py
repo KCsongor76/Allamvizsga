@@ -35,8 +35,6 @@ def signup_controller():
 
             # Fetches database for the currently maximum user_id
             user_id = User.get_max_id()
-            print(user_id)
-            print(password)
 
             # Inserting user data into database (id, username, password)
             user = User(user_id)
@@ -44,7 +42,6 @@ def signup_controller():
 
             actors = RecSys.get_unique_actors()
             genres = RecSys.get_unique_genres()
-            print(genres)
             return jsonify(
                 {
                     "actors": actors,

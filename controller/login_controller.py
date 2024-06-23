@@ -11,7 +11,7 @@ def login_controller():
         Unsuccessful -> sends message to frontend. \n
         Successful -> generates the recommendation, and sends the movies to the frontend.
         :return:
-        """
+    """
     try:
         # Validate request method and form data
         if request.method != 'POST' or 'username' not in request.form or 'password' not in request.form:

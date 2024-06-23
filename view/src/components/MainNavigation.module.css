@@ -1,4 +1,4 @@
-/* External Styling for Navigation Container */
+
 .container {
     background-color: #cccccc;
     padding: 10px;
@@ -7,7 +7,6 @@
     justify-content: center;
 }
 
-/* External Styling for Navigation List */
 .navList {
     list-style: none;
     display: flex;
@@ -15,7 +14,6 @@
     margin: 0;
 }
 
-/* External Styling for Navigation Links */
 .navLink {
     text-decoration: none;
     color: black;
@@ -25,21 +23,6 @@
     transition: color 0.3s ease-in-out;
 }
 
-.navLink::before {
-    content: "";
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: -2px;
-    left: 0;
-    background-color: #007bff;
-    transition: width 0.3s ease-in-out;
-}
-
 .navLink:hover {
     color: #007bff;
-}
-
-.navLink:hover::before {
-    width: 100%;
 }

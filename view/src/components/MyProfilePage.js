@@ -1,13 +1,10 @@
-import React, { useContext } from "react";
-import { UserContext } from "../App";
+import React from "react";
 import { useLoaderData } from "react-router-dom";
 import ProfileDataComponent from "./ProfileDataComponent";
 import ProfilePageRow from "./ProfilePageRow";
 
 const MyProfilePage = () => {
-  const { username } = useContext(UserContext);
   const userStats = useLoaderData();
-  console.log(username);
 
   return (
     <>

@@ -22,6 +22,12 @@ def connect_to_db():
 
 
 def insert_users():
+    """
+    Function to insert user data into the users table.
+    Utilizes a connection to the database, Faker for generating fake data, and hashlib for password hashing.
+    No parameters.
+    No return value.
+    """
     connection = connect_to_db()
     faker = Faker()
     num_records = 610
