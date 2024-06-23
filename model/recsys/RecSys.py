@@ -3,6 +3,7 @@ import pickle
 import random
 import numpy as np
 import pandas as pd
+from nltk.corpus import stopwords
 from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -19,43 +20,94 @@ from model.recsys.User import User
 
 class RecSys(AbstractRecSys):
 
+    # @classmethod
+    # def tfidf_recommender(cls, all_movies, genres, actors, movie_name="Star Wars: Episode III - Revenge of the Sith",
+    #                       top_n=5):
+    #     print(f"genres: {genres}, type: {type(genres)}")
+    #     print(f"actors: {actors}, type: {type(actors)}")
+    #     print()
+    #     print(f"all_movies[tags]: {all_movies['genre'][0]}, type: {type(all_movies['genre'][0])}")
+    #     print(f"all_movies[tags]: {all_movies['actors'][0]}, type: {type(all_movies['actors'][0])}")
+    #     # TF-IDF Vectorization
+    #     tfidf = TfidfVectorizer(max_features=5000, stop_words='english')
+    #     all_movies['tags'] = all_movies['genre'] + ' ' + all_movies['actors']
+    #     vectorized_data = tfidf.fit_transform(all_movies['tags'])
+    #     # Calculate cosine similarity directly on TF-IDF vectors
+    #     similarity = cosine_similarity(vectorized_data)
+    #
+    #     movie_index = all_movies[all_movies.title == movie_name].index.values[0]
+    #     sim_scores_all = sorted(list(enumerate(similarity[movie_index])), key=lambda x: x[1], reverse=True)
+    #
+    #     if top_n > 0:
+    #         sim_scores_all = sim_scores_all[1:top_n + 1]
+    #
+    #     # get the movie indices of the top similar movies
+    #     movie_indices = [i[0] for i in sim_scores_all]
+    #     scores = [i[1] for i in sim_scores_all]
+    #
+    #     # return the top n most similar movies from the movies df
+    #     top_titles_df = pd.DataFrame(all_movies.iloc[movie_indices]['title'])
+    #     top_titles_df['sim_scores'] = scores
+    #     top_titles_df['ranking'] = range(1, len(top_titles_df) + 1)
+    #
+    #     recommended_movies = []
+    #     for title in top_titles_df['title']:
+    #         movie = Database.db_process(query="SELECT * FROM movies WHERE title = %s", params=(title,), fetchone=True)
+    #         recommended_movies.append(Movie.movie_to_dict(movie))
+    #     return recommended_movies
+
     @classmethod
-    def tfidf_recommender(cls, user_id: int, movies: pd.DataFrame, genres: str, actors: str, top_n: int = 15):
+    def tfidf_recommender(cls, all_movies, genres, actors, top_n=5):
+        # Print input details for debugging
+        print(f"genres: {genres}, type: {type(genres)}")
+        print(f"actors: {actors}, type: {type(actors)}")
+        print()
+        print(f"all_movies[genre]: {all_movies['genre'][0]}, type: {type(all_movies['genre'][0])}")
+        print(f"all_movies[actors]: {all_movies['actors'][0]}, type: {type(all_movies['actors'][0])}")
 
-        rated_movies = Movie.get_rated_movies_by_user_id(user_id)
-        rated_movie_ids = [movie['id'] for movie in rated_movies]
+        # Ensure genres are formatted correctly
+        genres = genres.replace('|', ' ')
 
-        # Step 1: Combine genres and actors into a single 'tags' column
-        movies['tags'] = movies['genre'] + ' ' + movies['actors']
+        # Ensure actors are formatted correctly
+        actors = ' '.join(actor.replace(' ', '') for actor in actors.split('|'))
 
-        genres = ' '.join(genres.split('|'))
-        actors = ' '.join(actors.split('|'))
-        # Step 2: Create a query string from the input genres and actors
-        query = genres + ' ' + actors
-        query = ' '.join(query.split())  # Ensure there's no extraneous whitespace
-        print(f"Query: {query}")
+        # Combine genres and actors into a single string
+        input_tags = f"{genres} {actors}"
+        print(f"input_tags: {input_tags}")
+        all_movies['tags'] = all_movies['genre'] + ' ' + all_movies[
+            'actors']  # .str.replace(' ', '').str.replace('|', ' ')
+        print(f"all_movies[tags][0]: {all_movies['tags'][0]}")
 
-        # Step 3: Vectorize the 'tags' column
-        tfidf = TfidfVectorizer(stop_words='english')
-        tfidf_matrix = tfidf.fit_transform(movies['tags'])
+        # TF-IDF Vectorization
+        tfidf = TfidfVectorizer(max_features=5000, stop_words='english')
+        vectorized_data = tfidf.fit_transform(all_movies['tags'])
 
-        # Step 4: Vectorize the query
-        query_vec = tfidf.transform([query])
-        print(f"query vec: {query_vec}")
+        # Transform the input_tags
+        input_vector = tfidf.transform([input_tags])
 
-        # Step 5: Compute cosine similarity between the query and the movies
-        cosine_sim = cosine_similarity(query_vec, tfidf_matrix).flatten()
+        # Calculate cosine similarity between input_vector and all movies
+        similarity = cosine_similarity(input_vector, vectorized_data)
 
-        # Step 6: Get the top N movie indices
-        top_indices = [idx for idx in cosine_sim.argsort()[::-1] if movies.iloc[idx]['id'] not in rated_movie_ids]
-        print(f"Top indices: {top_indices}")
+        # Get similarity scores
+        sim_scores_all = list(enumerate(similarity[0]))
+        sim_scores_all = sorted(sim_scores_all, key=lambda x: x[1], reverse=True)
 
-        # Step 7: Get the top N movie IDs
-        top_movie_ids = movies.iloc[top_indices[:top_n]]['id'].values
-        print(f"Top movie ids: {top_movie_ids}")
+        if top_n > 0:
+            sim_scores_all = sim_scores_all[:top_n]
 
-        recommended_movies = Movie.get_movies_by_id_list(top_movie_ids.tolist())
-        print(f"recommended movies: {recommended_movies}")
+        # Get the movie indices of the top similar movies
+        movie_indices = [i[0] for i in sim_scores_all]
+        scores = [i[1] for i in sim_scores_all]
+
+        # Return the top n most similar movies from the movies df
+        top_titles_df = pd.DataFrame(all_movies.iloc[movie_indices]['title'])
+        top_titles_df['sim_scores'] = scores
+        top_titles_df['ranking'] = range(1, len(top_titles_df) + 1)
+
+        recommended_movies = []
+        for title in top_titles_df['title']:
+            movie = Database.db_process(query="SELECT * FROM movies WHERE title = %s", params=(title,), fetchone=True)
+            recommended_movies.append(Movie.movie_to_dict(movie))
         return recommended_movies
 
     @staticmethod
@@ -224,14 +276,14 @@ class RecSys(AbstractRecSys):
             print(f"first moviedata: {all_movies['actors']}")
             if len(threshold_ok_movies) == 0:
                 print("popular + tf-idf")
-                tf_ifd_movies = cls.tfidf_recommender(user_id=user_id, movies=all_movies, genres=genres, actors=actors,
-                                                      top_n=5)
-                recommended_movies = list(tf_ifd_movies) + list(popular_movies_dict)[:5]
+                # tf_ifd_movies = cls.tfidf_recommender(user_id=user_id, movies=all_movies, genres=genres, actors=actors,
+                #                                       top_n=5)
+                tf_idf_movies = cls.tfidf_recommender(all_movies=all_movies, genres=genres, actors=actors, top_n=5)
+                recommended_movies = list(tf_idf_movies) + list(popular_movies_dict)[:5]
                 return recommended_movies
             else:
                 print("popular + tf-idf + sbert")
-                tf_idf_movies = cls.tfidf_recommender(user_id=user_id, movies=all_movies, genres=genres, actors=actors,
-                                                      top_n=2)
+                tf_idf_movies = cls.tfidf_recommender(all_movies=all_movies, genres=genres, actors=actors, top_n=2)
                 sbert_movies = cls.sbert_recommender(user_id=user_id, generated_movies=popular_movies_dict, top_n=3)
                 recommended_movies = list(sbert_movies) + list(tf_idf_movies) + list(popular_movies_dict)[:5]
                 return recommended_movies
@@ -257,8 +309,7 @@ class RecSys(AbstractRecSys):
         else:
             print("KNN + TFIDF + SBERT")
             all_movies = Movie.get_movies_from_mysql()
-            tf_idf_movies = cls.tfidf_recommender(user_id=user_id, movies=all_movies, genres=genres, actors=actors,
-                                                  top_n=2)
+            tf_idf_movies = cls.tfidf_recommender(all_movies=all_movies, genres=genres, actors=actors, top_n=2)
             # TODO: TF-IDF - already rated movies
             sbert_movies = cls.sbert_recommender(user_id=user_id, generated_movies=rated_movies, top_n=2)
             recommended_movies = list(sbert_movies) + list(tf_idf_movies) + list(collaborative_movies)
@@ -284,8 +335,7 @@ class RecSys(AbstractRecSys):
         else:
             print("SVD + TFIDF + SBERT")
             all_movies = Movie.get_movies_from_mysql()
-            tf_idf_movies = cls.tfidf_recommender(user_id=user_id, movies=all_movies, genres=genres, actors=actors,
-                                                  top_n=2)
+            tf_idf_movies = cls.tfidf_recommender(all_movies=all_movies, genres=genres, actors=actors, top_n=2)
             # TODO: TF-IDF - already rated movies
             sbert_movies = cls.sbert_recommender(user_id=user_id, generated_movies=rated_movies, top_n=2)
             recommended_movies = list(sbert_movies) + list(tf_idf_movies) + list(collaborative_movies)

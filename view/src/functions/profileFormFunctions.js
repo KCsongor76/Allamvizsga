@@ -6,7 +6,6 @@ export const profileSubmitHandler = (
   userId,
   onCreateProfile,
   username,
-  setLoading
 ) => {
   event.preventDefault();
   const form = event.target;
@@ -19,7 +18,6 @@ export const profileSubmitHandler = (
     userId,
   };
 
-  setLoading(true);
   // Append selectedGenres and selectedActors to formData
   formData.append("selectedData", JSON.stringify(selectedData));
 
@@ -30,14 +28,12 @@ export const profileSubmitHandler = (
     .then((response) => response.json())
     .then((data) => {
       console.log({ ...data, username });
-      setLoading(false);
       if (data.message) {
         alert(data.message + "!");
       }
       onCreateProfile({ ...data, username });
     })
     .catch((error) => {
-      setLoading(true);
       console.error("Error:", error);
     });
 };

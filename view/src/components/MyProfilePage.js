@@ -1,8 +1,8 @@
 import React, { useContext } from "react";
 import { UserContext } from "../App";
-import Row from "./Row";
 import { useLoaderData } from "react-router-dom";
 import ProfileDataComponent from "./ProfileDataComponent";
+import ProfilePageRow from "./ProfilePageRow";
 
 const MyProfilePage = () => {
   const { username } = useContext(UserContext);
@@ -12,7 +12,7 @@ const MyProfilePage = () => {
   return (
     <>
       <ProfileDataComponent userStats={userStats} />
-      {userStats.movies && <Row movies={userStats.movies} isProfile={true} />}
+      {userStats.movies && <ProfilePageRow movies={userStats.movies} isProfile={true} />}
     </>
   );
 };

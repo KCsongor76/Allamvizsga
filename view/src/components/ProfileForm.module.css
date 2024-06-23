@@ -4,22 +4,22 @@
   display: flex;
   flex-direction: column;
   max-width: 400px;
-  margin: 20px auto;
-  padding: 20px;
+  margin: 10px auto;
+  padding: 15px;
   background-color: #f8f8f8;
   border-radius: 20px;
 }
 
 
 .label {
-  margin: 10px 0;
+  margin: 5px 0;
   font-size: 14px;
   color: #333;
 }
 
 
 .input {
-  padding: 12px;
+  padding: 10px;
   margin-bottom: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -34,7 +34,7 @@
 
 .button {
   width: 100%;
-  padding: 10px 20px;
+  padding: 10px;
   background-color: #007bff;
   color: white;
   border: none;

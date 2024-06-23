@@ -18,8 +18,6 @@ const ProfileForm = ({ genres, actors, userId, onCreateProfile, username }) => {
   const [genreSearchTerm, setGenreSearchTerm] = useState("");
   const [actorSearchTerm, setActorSearchTerm] = useState("");
 
-  const [loading, setLoading] = useState(false);
-
   const filteredNonSelectedGenres = nonSelectedGenres.filter((genre) =>
     genre.toLowerCase().includes(genreSearchTerm.toLowerCase())
   );
@@ -43,7 +41,6 @@ const ProfileForm = ({ genres, actors, userId, onCreateProfile, username }) => {
           userId,
           onCreateProfile,
           username,
-          setLoading
         )
       }
     >
@@ -176,7 +173,6 @@ const ProfileForm = ({ genres, actors, userId, onCreateProfile, username }) => {
       <button type="submit" className={classes.button}>
         Submit
       </button>
-      {loading && <div className={classes.loadingIcon} />}
     </form>
   );
 };

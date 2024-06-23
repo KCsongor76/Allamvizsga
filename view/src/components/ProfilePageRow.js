@@ -7,7 +7,7 @@ import {
   handlePrevClick,
 } from "../functions/rowFunctions";
 
-const Row = ({ movies, isProfile }) => {
+const ProfilePageRow = ({ movies, isProfile }) => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const itemsPerPage = calculateItemsPerPage(windowWidth); // Calculate items per page based on resolution
   const [currentPage, setCurrentPage] = useState(0);
@@ -59,14 +59,15 @@ const Row = ({ movies, isProfile }) => {
               item={item}
               index={index}
               isProfile={isProfile}
+              quantity={visibleItems.length}
             />
           ))
         ) : (
-          <p style={{ color: "red" }}>No movies.</p>
+          <p style={{ color: "red" }}>No Recommended Movies.</p>
         )}
       </div>
     </div>
   );
 };
 
-export default Row;
+export default ProfilePageRow;
